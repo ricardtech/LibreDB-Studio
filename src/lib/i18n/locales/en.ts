@@ -80,4 +80,9 @@ export const en = {
   },
 } as const;
 
-export type TranslationKey = typeof en;
+type DeepString<T> = {
+  [K in keyof T]: T[K] extends string ? string : DeepString<T[K]>;
+};
+
+export type TranslationKey = DeepString<typeof en>;
+

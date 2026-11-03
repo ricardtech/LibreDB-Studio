@@ -48,7 +48,7 @@ ENV USER_PASSWORD=$USER_PASSWORD_BUILD
 
 # Stage Monaco from node_modules into public/ so the editor is served from our own
 # origin (issue #247). Explicit here: this bypasses the package.json build script.
-RUN node scripts/copy-monaco.mjs && npx next build
+RUN node scripts/copy-monaco.mjs && NODE_OPTIONS="--max-old-space-size=6144" npx next build
 
 # Drop the repo-root extras Next's output file tracing swept into the payload
 # (issue #124). Tracing walks the repository root, so `.next/standalone` carries
