@@ -16,6 +16,7 @@ import { useAccounts } from "@/components/admin/accounts/use-accounts";
 import { AuthenticatorSettings } from "@/components/auth/AuthenticatorSettings";
 import { PasskeySettings } from "@/components/auth/PasskeySettings";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "@/lib/i18n";
 
 /**
  * The admin Accounts screen (#784): the local email and password accounts as one table with a
@@ -23,6 +24,7 @@ import { Button } from "@/components/ui/button";
  * Both need the account registry, so they are hidden with it.
  */
 export function AccountsTab() {
+  const { t } = useTranslation();
   const controller = useAccounts();
   const actions = useAccountActions(controller);
   const [query, setQuery] = useState("");
@@ -75,10 +77,13 @@ export function AccountsTab() {
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div className="space-y-1">
             <h2 id="accounts-heading" className="text-lg font-semibold tracking-tight text-fg">
-              Accounts
+              {t("accounts.title", "Accounts")}
             </h2>
             <p className="text-sm text-fg-muted">
-              Local email and password sign-ins. Each account keeps its own saved connections.
+              {t(
+                "accounts.desc",
+                "Local email and password sign-ins. Each account keeps its own saved connections.",
+              )}
             </p>
           </div>
           {view.kind === "ready" ? (
@@ -88,7 +93,7 @@ export function AccountsTab() {
               className="self-start bg-brand-solid text-white hover:bg-brand-solid-hover sm:self-auto"
             >
               <Plus />
-              Add account
+              {t("accounts.addAccount", "Add account")}
             </Button>
           ) : null}
         </div>

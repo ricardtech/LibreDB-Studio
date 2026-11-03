@@ -1,6 +1,7 @@
 "use client";
 
 import React, { memo, useEffect } from "react";
+import { useTranslation } from "@/lib/i18n";
 import { Handle, Position, useUpdateNodeInternals, type NodeProps } from "@xyflow/react";
 import { Database, Hash, Key, Link2, Type } from "lucide-react";
 import { objectPathLabel } from "@/lib/db/object-path";
@@ -83,6 +84,7 @@ const ColumnRow = memo(function ColumnRow({ column, isFk, hasSourceHandle, hasTa
 });
 
 export const TableNode = memo(function TableNode({ id, data }: NodeProps<TableFlowNode>) {
+  const { isPt } = useTranslation();
   const highlighted = useTableHighlighted(id);
   const { toggleExpand } = useDiagramActions();
   const updateNodeInternals = useUpdateNodeInternals();
@@ -135,7 +137,9 @@ export const TableNode = memo(function TableNode({ id, data }: NodeProps<TableFl
           {table.name}
         </span>
         {kindLabel && (
-          <span className="text-[0.625rem] text-fg-secondary border border-hairline rounded px-1">{kindLabel}</span>
+          <span className="text-[0.625rem] text-fg-secondary border border-hairline rounded px-1">
+            {isPt ? (kindLabel === "Table" ? "Tabela" : kindLabel) : kindLabel}
+          </span>
         )}
         <span className="text-[0.625rem] text-fg-subtle ml-auto">{table.columns?.length || 0} cols</span>
       </div>

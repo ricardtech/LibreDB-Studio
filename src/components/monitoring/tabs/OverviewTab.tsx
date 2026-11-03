@@ -14,6 +14,7 @@ import { CACHE_HIT_RATIO_UNAVAILABLE } from "@/lib/monitoring-cache-ratio";
 import { sessionActivityFigure } from "@/lib/session-activity";
 import { MetricChart } from "./MetricChart";
 import { PanelUnavailable } from "../PanelUnavailable";
+import { useTranslation } from "@/lib/i18n";
 
 interface OverviewTabProps {
   data: MonitoringData | null;
@@ -22,6 +23,7 @@ interface OverviewTabProps {
 }
 
 export function OverviewTab({ data, loading, history = [] }: OverviewTabProps) {
+  const { isPt } = useTranslation();
   if (loading && !data) {
     return <OverviewSkeleton />;
   }
@@ -160,14 +162,18 @@ export function OverviewTab({ data, loading, history = [] }: OverviewTabProps) {
           </CardHeader>
           <CardContent className="p-3 sm:p-4 pt-0">
             <div className="text-lg sm:text-2xl font-medium">{overview?.databaseSize || "N/A"}</div>
-            <p className="text-xs sm:text-xs text-muted-foreground mt-1">Total storage</p>
+            <p className="text-xs sm:text-xs text-muted-foreground mt-1">
+              {isPt ? "Armazenamento total" : "Total storage"}
+            </p>
           </CardContent>
         </Card>
 
         {/* Cache Hit Ratio */}
         <Card className={`p-0 border-2 transition-colors ${getThresholdColor(cacheThreshold)}`}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 sm:p-4 pb-1 sm:pb-2">
-            <CardTitle className="text-xs sm:text-xs font-medium text-muted-foreground">Cache Hit</CardTitle>
+            <CardTitle className="text-xs sm:text-xs font-medium text-muted-foreground">
+              {isPt ? "Acerto de Cache" : "Cache Hit"}
+            </CardTitle>
             <Activity strokeWidth={1.5} className="h-3 w-3 sm:h-4 sm:w-4 text-hue-green" />
           </CardHeader>
           <CardContent className="p-3 sm:p-4 pt-0">
@@ -176,14 +182,26 @@ export function OverviewTab({ data, loading, history = [] }: OverviewTabProps) {
                 <div className="text-lg sm:text-2xl font-medium text-muted-foreground">
                   {CACHE_HIT_RATIO_UNAVAILABLE}
                 </div>
-                <p className="text-xs sm:text-xs text-muted-foreground mt-1 truncate">Not measured</p>
+                <p className="text-xs sm:text-xs text-muted-foreground mt-1 truncate">
+                  {isPt ? "Não medido" : "Not measured"}
+                </p>
               </>
             ) : (
               <>
                 <div className="text-lg sm:text-2xl font-medium">{cacheHitRatio.toFixed(1)}%</div>
                 <Progress value={cacheHitRatio} className="h-1 mt-1 sm:mt-2" />
                 <p className="text-xs sm:text-xs text-muted-foreground mt-1 truncate">
-                  {cacheHitRatio >= 90 ? "Excellent" : cacheHitRatio >= 80 ? "Good" : "Needs tuning"}
+                  {cacheHitRatio >= 90
+                    ? isPt
+                      ? "Excelente"
+                      : "Excellent"
+                    : cacheHitRatio >= 80
+                      ? isPt
+                        ? "Bom"
+                        : "Good"
+                      : isPt
+                        ? "Precisa de ajuste"
+                        : "Needs tuning"}
                 </p>
               </>
             )}
@@ -193,7 +211,9 @@ export function OverviewTab({ data, loading, history = [] }: OverviewTabProps) {
         {/* Tables & Indexes */}
         <Card className="p-0">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 p-3 sm:p-4 pb-1 sm:pb-2">
-            <CardTitle className="text-xs sm:text-xs font-medium text-muted-foreground">Tables</CardTitle>
+            <CardTitle className="text-xs sm:text-xs font-medium text-muted-foreground">
+              {isPt ? "Tabelas" : "Tables"}
+            </CardTitle>
             <Table2 strokeWidth={1.5} className="h-3 w-3 sm:h-4 sm:w-4 text-hue-purple" />
           </CardHeader>
           <CardContent className="p-3 sm:p-4 pt-0">
@@ -208,7 +228,9 @@ export function OverviewTab({ data, loading, history = [] }: OverviewTabProps) {
                 {`At least ${tableFloor}: counted from ${tableCountSampledFrom}`}
               </p>
             )}
-            <p className="text-xs sm:text-xs text-muted-foreground mt-1">{overview?.indexCount ?? 0} indexes</p>
+            <p className="text-xs sm:text-xs text-muted-foreground mt-1">
+              {overview?.indexCount ?? 0} {isPt ? "índices" : "indexes"}
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -279,12 +301,13 @@ function PerformanceSummaryCard({
   deadlocks: number | undefined;
   checkpointWriteTime: string | undefined;
 }>) {
+  const { isPt } = useTranslation();
   return (
     <Card className="p-0">
       <CardHeader className="p-3 sm:p-4 pb-2">
         <CardTitle className="text-xs sm:text-xs font-medium flex items-center gap-2">
           <Activity strokeWidth={1.5} className="h-3 w-3 sm:h-4 sm:w-4" />
-          Performance
+          {isPt ? "Desempenho" : "Performance"}
         </CardTitle>
       </CardHeader>
       <CardContent className="p-3 sm:p-4 pt-0 space-y-2 sm:space-y-3">
@@ -293,7 +316,9 @@ function PerformanceSummaryCard({
           <div className="flex items-center gap-1 sm:gap-2">
             {bufferPoolUsage === undefined ? (
               <>
-                <span className="text-xs sm:text-xs text-muted-foreground">Not measured</span>
+                <span className="text-xs sm:text-xs text-muted-foreground">
+                  {isPt ? "Não medido" : "Not measured"}
+                </span>
                 <span className="text-xs sm:text-xs font-medium w-8 sm:w-12 text-right text-muted-foreground">N/A</span>
               </>
             ) : (
@@ -310,7 +335,9 @@ function PerformanceSummaryCard({
           <span className="text-xs sm:text-xs text-muted-foreground">Deadlocks</span>
           {deadlocks === undefined ? (
             <div className="flex items-center gap-1 sm:gap-2">
-              <span className="text-xs sm:text-xs text-muted-foreground">Not measured</span>
+              <span className="text-xs sm:text-xs text-muted-foreground">
+                {isPt ? "Não medido" : "Not measured"}
+              </span>
               <Badge variant="outline" className="text-xs text-muted-foreground">
                 N/A
               </Badge>
@@ -370,6 +397,7 @@ function quickStat(rows: readonly unknown[] | undefined, count: () => number): s
 }
 
 function QuickStatsCard({ data }: Readonly<{ data: MonitoringData | null }>) {
+  const { isPt } = useTranslation();
   const sessions = data?.activeSessions;
 
   return (
@@ -377,12 +405,14 @@ function QuickStatsCard({ data }: Readonly<{ data: MonitoringData | null }>) {
       <CardHeader className="p-3 sm:p-4 pb-2">
         <CardTitle className="text-xs sm:text-xs font-medium flex items-center gap-2">
           <Hash strokeWidth={1.5} className="h-3 w-3 sm:h-4 sm:w-4" />
-          Quick Stats
+          {isPt ? "Estatísticas Rápidas" : "Quick Stats"}
         </CardTitle>
       </CardHeader>
       <CardContent className="p-3 sm:p-4 pt-0 space-y-2 sm:space-y-3">
         <div className="flex justify-between items-center">
-          <span className="text-xs sm:text-xs text-muted-foreground">Listed slow queries</span>
+          <span className="text-xs sm:text-xs text-muted-foreground">
+            {isPt ? "Consultas lentas listadas" : "Listed slow queries"}
+          </span>
           <Badge
             variant={data?.slowQueries?.length ? "outline" : "secondary"}
             className="text-xs"
@@ -392,13 +422,17 @@ function QuickStatsCard({ data }: Readonly<{ data: MonitoringData | null }>) {
           </Badge>
         </div>
         <div className="flex justify-between items-center">
-          <span className="text-xs sm:text-xs text-muted-foreground">Active of listed sessions</span>
+          <span className="text-xs sm:text-xs text-muted-foreground">
+            {isPt ? "Ativas das sessões listadas" : "Active of listed sessions"}
+          </span>
           <Badge variant="secondary" className="text-xs" data-testid="quick-stat-active">
             {sessionActivityFigure(sessions ?? [], "active", sessions === undefined)}
           </Badge>
         </div>
         <div className="flex justify-between items-center">
-          <span className="text-xs sm:text-xs text-muted-foreground">Idle of listed sessions</span>
+          <span className="text-xs sm:text-xs text-muted-foreground">
+            {isPt ? "Ociosas das sessões listadas" : "Idle of listed sessions"}
+          </span>
           <Badge variant="secondary" className="text-xs" data-testid="quick-stat-idle">
             {sessionActivityFigure(sessions ?? [], "idle", sessions === undefined)}
           </Badge>

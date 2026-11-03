@@ -4,6 +4,7 @@ import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import type { PublicAccount } from "@/lib/local-accounts";
+import { useTranslation } from "@/lib/i18n";
 
 /** Search by email, one filter, and the count line above the Accounts table. */
 
@@ -40,6 +41,26 @@ export function AccountsToolbar({
   onFilterChange: (filter: AccountFilter) => void;
   count: string;
 }) {
+  const { isPt } = useTranslation();
+
+  const getFilterLabel = (key: AccountFilter) => {
+    if (!isPt) return FILTERS[key].label;
+    switch (key) {
+      case "all":
+        return "Todas as contas";
+      case "admin":
+        return "Administradores";
+      case "user":
+        return "Usuários";
+      case "disabled":
+        return "Desativadas";
+      case "totp-on":
+        return "Dois fatores ativado";
+      case "totp-off":
+        return "Dois fatores desativado";
+    }
+  };
+
   return (
     <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
       <div className="relative sm:w-72">
@@ -50,7 +71,7 @@ export function AccountsToolbar({
         <Input
           type="search"
           aria-label="Search accounts by email"
-          placeholder="Search by email"
+          placeholder={isPt ? "Pesquisar por e-mail" : "Search by email"}
           value={query}
           onChange={(event) => onQueryChange(event.target.value)}
           className={`${CONTROL} pl-9`}
@@ -63,7 +84,7 @@ export function AccountsToolbar({
         <SelectContent className="border-hairline-strong bg-raised text-fg-secondary">
           {FILTER_KEYS.map((key) => (
             <SelectItem key={key} value={key}>
-              {FILTERS[key].label}
+              {getFilterLabel(key)}
             </SelectItem>
           ))}
         </SelectContent>

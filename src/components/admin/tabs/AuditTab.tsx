@@ -28,6 +28,7 @@ import {
   Download,
 } from "lucide-react";
 import type { AuditEvent } from "@/lib/audit";
+import { useTranslation } from "@/lib/i18n";
 import { storage } from "@/lib/storage";
 import type { QueryHistoryItem } from "@/lib/types";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
@@ -61,6 +62,7 @@ function AuditExport({ disabled, onExport }: AuditExportProps) {
 }
 
 export function AuditTab() {
+  const { t } = useTranslation();
   return (
     <div className="space-y-6">
       <Tabs defaultValue="operations">
@@ -70,21 +72,21 @@ export function AuditTab() {
             className="gap-2 rounded-none border-b-2 border-transparent data-[state=active]:border-brand data-[state=active]:bg-transparent data-[state=active]:text-brand text-fg-muted text-xs px-4"
           >
             <Wrench className="h-3.5 w-3.5" />
-            Operations
+            {t("audit.operations", "Operations")}
           </TabsTrigger>
           <TabsTrigger
             value="queries"
             className="gap-2 rounded-none border-b-2 border-transparent data-[state=active]:border-brand data-[state=active]:bg-transparent data-[state=active]:text-brand text-fg-muted text-xs px-4"
           >
             <SearchIcon className="h-3.5 w-3.5" />
-            Queries
+            {t("audit.queries", "Queries")}
           </TabsTrigger>
           <TabsTrigger
             value="stats"
             className="gap-2 rounded-none border-b-2 border-transparent data-[state=active]:border-brand data-[state=active]:bg-transparent data-[state=active]:text-brand text-fg-muted text-xs px-4"
           >
             <ChartColumn className="h-3.5 w-3.5" />
-            Stats
+            {t("audit.stats", "Stats")}
           </TabsTrigger>
         </TabsList>
 
@@ -120,6 +122,7 @@ async function loadAuditEvents(type: string): Promise<AuditEvent[]> {
 }
 
 function OperationsAudit() {
+  const { t, isPt } = useTranslation();
   const [events, setEvents] = useState<AuditEvent[]>([]);
   const [loading, setLoading] = useState(true);
   const [typeFilter, setTypeFilter] = useState<string>("all");
@@ -240,21 +243,21 @@ function OperationsAudit() {
             <SelectValue placeholder="Type" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Types</SelectItem>
-            <SelectItem value="maintenance">Maintenance</SelectItem>
-            <SelectItem value="kill_session">Kill Session</SelectItem>
-            <SelectItem value="masking_config">Masking</SelectItem>
-            <SelectItem value="threshold_config">Thresholds</SelectItem>
-            <SelectItem value="login_success">Login Success</SelectItem>
-            <SelectItem value="login_failure">Login Failure</SelectItem>
+            <SelectItem value="all">{isPt ? "Todos os Tipos" : "All Types"}</SelectItem>
+            <SelectItem value="maintenance">{isPt ? "Manutenção" : "Maintenance"}</SelectItem>
+            <SelectItem value="kill_session">{isPt ? "Encerrar Sessão" : "Kill Session"}</SelectItem>
+            <SelectItem value="masking_config">{isPt ? "Mascaramento" : "Masking"}</SelectItem>
+            <SelectItem value="threshold_config">{isPt ? "Limites" : "Thresholds"}</SelectItem>
+            <SelectItem value="login_success">{isPt ? "Login com Sucesso" : "Login Success"}</SelectItem>
+            <SelectItem value="login_failure">{isPt ? "Falha de Login" : "Login Failure"}</SelectItem>
             <SelectItem value="logout">Logout</SelectItem>
-            <SelectItem value="permission_denied">Permission Denied</SelectItem>
-            <SelectItem value="rate_limit_exceeded">Rate Limited</SelectItem>
-            <SelectItem value="account">Account</SelectItem>
+            <SelectItem value="permission_denied">{isPt ? "Permissão Negada" : "Permission Denied"}</SelectItem>
+            <SelectItem value="rate_limit_exceeded">{isPt ? "Limite de Taxa" : "Rate Limited"}</SelectItem>
+            <SelectItem value="account">{isPt ? "Conta" : "Account"}</SelectItem>
           </SelectContent>
         </Select>
         <Input
-          placeholder="Search..."
+          placeholder={isPt ? "Pesquisar..." : "Search..."}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           className="w-[180px] h-8 text-xs bg-panel border-hairline-strong"
@@ -267,7 +270,7 @@ function OperationsAudit() {
           disabled={loading}
         >
           <RefreshCw className={`w-3 h-3 mr-1.5 ${loading ? "animate-spin" : ""}`} />
-          Refresh
+          {t("audit.refresh", "Refresh")}
         </Button>
         <AuditExport disabled={loading || filteredEvents.length === 0} onExport={exportEvents} />
       </div>
@@ -275,10 +278,11 @@ function OperationsAudit() {
       {/* Stats Summary */}
       <div className="flex items-center gap-4 text-xs text-fg-muted">
         <span>
-          Total: <span className="font-bold text-fg-secondary">{events.length}</span> ops
+          {isPt ? "Total:" : "Total:"} <span className="font-bold text-fg-secondary">{events.length}</span>{" "}
+          {isPt ? "operações" : "ops"}
         </span>
         <span>
-          Success: <span className="font-bold text-success">{successRate}%</span>
+          {isPt ? "Sucesso:" : "Success:"} <span className="font-bold text-success">{successRate}%</span>
         </span>
       </div>
 
@@ -286,10 +290,10 @@ function OperationsAudit() {
           process is compiled, not of the current filter or of whether any event happens to be
           loaded, so there is no state in which this view is complete and the notice would lie. */}
       <p data-testid="audit-proxy-disclosure" className="text-xs text-fg-muted">
-        Shows events recorded by the application; boundary denials recorded by the proxy — a cross-origin request
-        rejected at the boundary, and a non-admin session reaching for <code className="text-fg-secondary">/admin</code>{" "}
-        — are not in this buffer. The <code className="text-fg-secondary">libredb.audit.v1</code> JSON lines on the
-        process log are the authoritative record of those.
+        {t(
+          "audit.proxyDisclosure",
+          "Shows events recorded by the application; boundary denials recorded by the proxy — a cross-origin request rejected at the boundary, and a non-admin session reaching for /admin — are not in this buffer. The libredb.audit.v1 JSON lines on the process log are the authoritative record of those.",
+        )}
       </p>
 
       {/* Events Table */}
@@ -303,8 +307,10 @@ function OperationsAudit() {
         ) : filteredEvents.length === 0 ? (
           <div className="p-8 text-center text-fg-subtle text-sm">
             <Wrench className="h-8 w-8 mx-auto mb-2 opacity-30" />
-            <p>No audit events found.</p>
-            <p className="text-xs mt-1 text-fg-faint">Operations will appear here when maintenance tasks are run.</p>
+            <p>{t("audit.noEvents", "No audit events found.")}</p>
+            <p className="text-xs mt-1 text-fg-faint">
+              {t("audit.noEventsDesc", "Operations will appear here when maintenance tasks are run.")}
+            </p>
           </div>
         ) : (
           <Table>

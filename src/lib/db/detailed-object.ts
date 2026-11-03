@@ -103,6 +103,7 @@ export function relationObjects(
 export function relationCountLabel(
   relations: readonly DetailedObject[],
   capabilities: ProviderCapabilities | undefined,
+  isPt?: boolean,
 ): string {
   const parts =
     capabilities === undefined
@@ -110,9 +111,15 @@ export function relationCountLabel(
       : declaredKinds(capabilities).flatMap((kind) => {
           const count = relations.filter((object) => object.kind === kind.id).length;
           if (count === 0) return [];
-          return [`${count} ${(count === 1 ? kind.label : kind.labelPlural).toLowerCase()}`];
+          let label = count === 1 ? kind.label : kind.labelPlural;
+          if (isPt) {
+            if (kind.id === "table") label = count === 1 ? "tabela" : "tabelas";
+            else if (kind.id === "view") label = count === 1 ? "view" : "views";
+            else if (kind.id === "materialized_view") label = count === 1 ? "view materializada" : "views materializadas";
+          }
+          return [`${count} ${label.toLowerCase()}`];
         });
-  return parts.length > 0 ? parts.join(", ") : `${relations.length} tables`;
+  return parts.length > 0 ? parts.join(", ") : `${relations.length} ${isPt ? "tabelas" : "tables"}`;
 }
 
 /**

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo, useCallback } from "react";
+import { useTranslation } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -180,10 +181,13 @@ function TableMaintenanceUnreachableNote({
 
 /** The Global Operations heading, shared by the section's cards and by the line that replaces them. */
 function GlobalOperationsHeading() {
+  const { t } = useTranslation();
   return (
     <div className="flex items-center gap-2 mb-3">
       <ShieldAlert className="h-4 w-4 text-brand" />
-      <h3 className="text-sm font-bold text-fg-secondary">Global Operations</h3>
+      <h3 className="text-sm font-bold text-fg-secondary">
+        {t("operations.globalOperations", "Global Operations")}
+      </h3>
     </div>
   );
 }
@@ -277,6 +281,7 @@ function MaintenanceResultTable({ report }: { report: Pick<MaintenanceResult, "r
 }
 
 export function OperationsTab() {
+  const { t, isPt } = useTranslation();
   // Only the operator's CHOICE is state; the list and the selected object are both
   // calculated during render from it. `useAllConnections` is read here, above the
   // hooks that take `selectedConnection` as an argument, because the derivation has
@@ -651,24 +656,26 @@ export function OperationsTab() {
       case "active":
         return (
           <Badge className="bg-hue-green-tint/10 text-hue-green border border-hue-green-tint/20 text-[0.625rem]">
-            Active
+            {isPt ? "Ativo" : "Active"}
           </Badge>
         );
       case "idle":
         return (
           <Badge variant="secondary" className="text-[0.625rem]">
-            Idle
+            {isPt ? "Ocioso" : "Idle"}
           </Badge>
         );
       case "idle in transaction":
         return (
           <Badge className="bg-hue-yellow-tint/10 text-hue-yellow border border-hue-yellow-tint/20 text-[0.625rem]">
-            Idle TX
+            {isPt ? "TX Ocioso" : "Idle TX"}
           </Badge>
         );
       case "idle in transaction (aborted)":
         return (
-          <Badge className="bg-hue-red-tint/10 text-hue-red border border-hue-red-tint/20 text-[0.625rem]">Abort</Badge>
+          <Badge className="bg-hue-red-tint/10 text-hue-red border border-hue-red-tint/20 text-[0.625rem]">
+            {isPt ? "Abortado" : "Abort"}
+          </Badge>
         );
       default:
         return (
@@ -765,12 +772,19 @@ export function OperationsTab() {
                     disabled={!!actionLoading || !selectedConnection}
                   >
                     {actionLoading === "analyze-global" ? <RefreshCw className="w-3 h-3 animate-spin mr-1" /> : null}
-                    {globalNames.analyze}
+                    {isPt ? t("operations.runAnalyze", "Executar Analyze") : globalNames.analyze}
                   </Button>
                 </div>
-                <h4 className="text-sm font-bold text-fg mb-1">{labels?.analyzeGlobalTitle ?? "Update Statistics"}</h4>
+                <h4 className="text-sm font-bold text-fg mb-1">
+                  {isPt ? t("operations.updateStats", "Atualizar Estatísticas") : (labels?.analyzeGlobalTitle ?? "Update Statistics")}
+                </h4>
                 <p className="text-xs text-fg-muted leading-relaxed">
-                  {labels?.analyzeGlobalDesc ?? "Updates query planner statistics for all tables."}
+                  {isPt
+                    ? t(
+                        "operations.updateStatsDesc",
+                        "Atualiza as estatísticas do planejador para todas as tabelas do banco de dados para melhorar a otimização de consultas.",
+                      )
+                    : (labels?.analyzeGlobalDesc ?? "Updates query planner statistics for all tables.")}
                 </p>
               </div>
             )}
@@ -792,12 +806,19 @@ export function OperationsTab() {
                     {actionLoading === `${vacuumOperation}-global` ? (
                       <RefreshCw className="w-3 h-3 animate-spin mr-1" />
                     ) : null}
-                    {globalNames[vacuumOperation]}
+                    {isPt ? t("operations.runVacuum", "Executar Vacuum") : globalNames[vacuumOperation]}
                   </Button>
                 </div>
-                <h4 className="text-sm font-bold text-fg mb-1">{labels?.vacuumGlobalTitle ?? "Reclaim Space"}</h4>
+                <h4 className="text-sm font-bold text-fg mb-1">
+                  {isPt ? t("operations.reclaimSpace", "Recuperar Espaço") : (labels?.vacuumGlobalTitle ?? "Reclaim Space")}
+                </h4>
                 <p className="text-xs text-fg-muted leading-relaxed">
-                  {labels?.vacuumGlobalDesc ?? "Removes dead rows and returns space to the OS."}
+                  {isPt
+                    ? t(
+                        "operations.reclaimSpaceDesc",
+                        "Remove linhas mortas das tabelas e devolve espaço ao sistema operacional.",
+                      )
+                    : (labels?.vacuumGlobalDesc ?? "Removes dead rows and returns space to the OS.")}
                 </p>
               </div>
             )}
@@ -821,12 +842,19 @@ export function OperationsTab() {
                     disabled={!!actionLoading || !selectedConnection}
                   >
                     {actionLoading === "reindex-global" ? <RefreshCw className="w-3 h-3 animate-spin mr-1" /> : null}
-                    {globalNames.reindex}
+                    {isPt ? t("operations.runReindex", "Executar Reindex") : globalNames.reindex}
                   </Button>
                 </div>
-                <h4 className="text-sm font-bold text-fg mb-1">{labels?.reindexGlobalTitle ?? "Rebuild Indexes"}</h4>
+                <h4 className="text-sm font-bold text-fg mb-1">
+                  {isPt ? t("operations.rebuildIndexes", "Reconstruir Índices") : (labels?.reindexGlobalTitle ?? "Rebuild Indexes")}
+                </h4>
                 <p className="text-xs text-fg-muted leading-relaxed">
-                  {labels?.reindexGlobalDesc ?? "Reconstructs all indexes in the database."}
+                  {isPt
+                    ? t(
+                        "operations.rebuildIndexesDesc",
+                        "Executa REINDEX DATABASE, reconstruindo todos os índices do banco de dados.",
+                      )
+                    : (labels?.reindexGlobalDesc ?? "Reconstructs all indexes in the database.")}
                 </p>
               </div>
             )}
@@ -863,10 +891,13 @@ export function OperationsTab() {
             <div className="p-4 rounded-xl border border-danger-tint/10 bg-danger-tint/5 flex flex-col justify-center">
               <div className="flex items-center gap-2 text-danger mb-2">
                 <ShieldAlert className="w-4 h-4" />
-                <span className="text-xs font-bold uppercase tracking-wider">Warning</span>
+                <span className="text-xs font-bold uppercase tracking-wider">{t("operations.warning", "Warning")}</span>
               </div>
               <p className="text-xs text-danger/70 leading-relaxed italic">
-                These operations can be resource-intensive. Avoid running them during peak traffic hours.
+                {t(
+                  "operations.warningDesc",
+                  "These operations can be resource-intensive. Avoid running them during peak traffic hours.",
+                )}
               </p>
             </div>
           </div>
@@ -894,11 +925,11 @@ export function OperationsTab() {
               <div className="flex items-center gap-2">
                 <Table2 className="w-4 h-4 text-brand" />
                 <span className="text-xs font-bold text-fg-secondary">
-                  {tablesUnavailable ? "Tables" : `${listNoun} (${tables.length})`}
+                  {tablesUnavailable ? (isPt ? "Tabelas" : "Tables") : `${isPt ? "Tabelas" : listNoun} (${tables.length})`}
                 </span>
               </div>
               <Input
-                placeholder="Filter..."
+                placeholder={isPt ? "Filtrar..." : "Filter..."}
                 value={tableSearch}
                 onChange={(e) => setTableSearch(e.target.value)}
                 className="w-[140px] h-7 text-xs bg-raised border-hairline-strong"
@@ -926,8 +957,12 @@ export function OperationsTab() {
                       table outside them may match, so it must not say no table was found. */}
                   {tablesUnavailable ??
                     (listScope !== undefined && tables.length > 0
-                      ? "No listed table matches the filter."
-                      : "No tables found.")}
+                      ? isPt
+                        ? "Nenhuma tabela listada corresponde ao filtro."
+                        : "No listed table matches the filter."
+                      : isPt
+                        ? "Nenhuma tabela encontrada."
+                        : "No tables found.")}
                 </div>
               ) : (
                 <div className="divide-y divide-hairline">
@@ -959,7 +994,9 @@ export function OperationsTab() {
                                   estimate - CockroachDB's NULL `reltuples` (#1540). */}
                               {table.rowCount !== undefined && (
                                 <>
-                                  <span className="font-mono">{table.rowCount.toLocaleString()} rows</span>
+                                  <span className="font-mono">
+                                    {table.rowCount.toLocaleString()} {isPt ? "linhas" : "rows"}
+                                  </span>
                                   <span>-</span>
                                 </>
                               )}
@@ -969,7 +1006,7 @@ export function OperationsTab() {
                                   variant="outline"
                                   className="text-[0.625rem] text-hue-yellow border-hue-yellow-tint/20 h-4"
                                 >
-                                  {(table.bloatRatio ?? 0).toFixed(0)}% bloat
+                                  {(table.bloatRatio ?? 0).toFixed(0)}% {isPt ? "inchaço" : "bloat"}
                                 </Badge>
                               )}
                             </>
@@ -1020,7 +1057,7 @@ export function OperationsTab() {
             <div className="flex items-center gap-2 mb-3">
               <Users className="w-4 h-4 text-hue-green" />
               <span className="text-xs font-bold text-fg-secondary">
-                {sessionsUnavailable ? "Sessions" : `Sessions (${sessions.length})`}
+                {sessionsUnavailable ? (isPt ? "Sessões" : "Sessions") : `${isPt ? "Sessões" : "Sessions"} (${sessions.length})`}
               </span>
             </div>
             <div className="grid grid-cols-4 gap-2">
@@ -1028,13 +1065,13 @@ export function OperationsTab() {
                 <div className="text-lg font-bold text-fg tabular-nums" data-testid="operations-session-stat-active">
                   {activeCount}
                 </div>
-                <div className="text-[0.625rem] text-fg-muted uppercase font-bold">Active</div>
+                <div className="text-[0.625rem] text-fg-muted uppercase font-bold">{isPt ? "Ativas" : "Active"}</div>
               </div>
               <div className="rounded-lg bg-fill p-2 text-center">
                 <div className="text-lg font-bold text-fg tabular-nums" data-testid="operations-session-stat-idle">
                   {idleCount}
                 </div>
-                <div className="text-[0.625rem] text-fg-muted uppercase font-bold">Idle</div>
+                <div className="text-[0.625rem] text-fg-muted uppercase font-bold">{isPt ? "Ociosas" : "Idle"}</div>
               </div>
               <div className="rounded-lg bg-fill p-2 text-center">
                 <div
@@ -1043,7 +1080,7 @@ export function OperationsTab() {
                 >
                   {idleInTxCount}
                 </div>
-                <div className="text-[0.625rem] text-fg-muted uppercase font-bold">In TX</div>
+                <div className="text-[0.625rem] text-fg-muted uppercase font-bold">{isPt ? "Em TX" : "In TX"}</div>
               </div>
               <div className="rounded-lg bg-fill p-2 text-center">
                 <div
@@ -1052,7 +1089,7 @@ export function OperationsTab() {
                 >
                   {waitingCount}
                 </div>
-                <div className="text-[0.625rem] text-fg-muted uppercase font-bold">Wait</div>
+                <div className="text-[0.625rem] text-fg-muted uppercase font-bold">{isPt ? "Aguardo" : "Wait"}</div>
               </div>
             </div>
           </div>
@@ -1068,20 +1105,20 @@ export function OperationsTab() {
                 {/* The order is deliberate: `sessionsUnavailable` is set only when the
                     READ failed, while `sessionsEmptyState` explains an engine that
                     publishes no session list at all (#518). */}
-                {sessionsUnavailable ?? labels?.sessionsEmptyState ?? "No active sessions found."}
+                {sessionsUnavailable ?? labels?.sessionsEmptyState ?? (isPt ? "Nenhuma sessão ativa encontrada." : "No active sessions found.")}
               </div>
             ) : (
               <Table>
                 <TableHeader>
                   <TableRow className="border-hairline hover:bg-transparent">
                     <TableHead className="text-xs text-fg-muted font-bold uppercase w-[60px]">PID</TableHead>
-                    <TableHead className="text-xs text-fg-muted font-bold uppercase">User</TableHead>
-                    <TableHead className="text-xs text-fg-muted font-bold uppercase">State</TableHead>
+                    <TableHead className="text-xs text-fg-muted font-bold uppercase">{isPt ? "Usuário" : "User"}</TableHead>
+                    <TableHead className="text-xs text-fg-muted font-bold uppercase">{isPt ? "Estado" : "State"}</TableHead>
                     <TableHead className="text-xs text-fg-muted font-bold uppercase hidden md:table-cell">
-                      Query
+                      {isPt ? "Consulta" : "Query"}
                     </TableHead>
-                    <TableHead className="text-xs text-fg-muted font-bold uppercase">Time</TableHead>
-                    <TableHead className="text-right text-xs text-fg-muted font-bold uppercase w-10">Act</TableHead>
+                    <TableHead className="text-xs text-fg-muted font-bold uppercase">{isPt ? "Tempo" : "Time"}</TableHead>
+                    <TableHead className="text-right text-xs text-fg-muted font-bold uppercase w-10">{isPt ? "Ação" : "Act"}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>

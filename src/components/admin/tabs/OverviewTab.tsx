@@ -690,7 +690,7 @@ function FleetHealthSection({
   fleetLoading: boolean;
   connections: DatabaseConnection[];
 }) {
-  const { t } = useTranslation();
+  const { t, isPt } = useTranslation();
   if (connections.length === 0) return null;
 
   const getStatusColor = (status: string) => {
@@ -793,7 +793,12 @@ function FleetHealthSection({
                           color: ENVIRONMENT_COLORS[item.environment as keyof typeof ENVIRONMENT_COLORS],
                         }}
                       >
-                        {ENVIRONMENT_LABELS[item.environment as keyof typeof ENVIRONMENT_LABELS] || item.environment}
+                        {item.environment === "other"
+                          ? isPt
+                            ? "outro"
+                            : "other"
+                          : ENVIRONMENT_LABELS[item.environment as keyof typeof ENVIRONMENT_LABELS] ||
+                            item.environment}
                       </Badge>
                     )}
                     <div className="p-1 rounded bg-fill">
@@ -818,9 +823,13 @@ function FleetHealthSection({
                 <div className="flex items-center gap-3 text-xs text-fg-muted">
                   <span className="font-mono text-fg-tertiary">
                     {item.status === "error"
-                      ? "timeout"
+                      ? isPt
+                        ? "tempo esgotado"
+                        : "timeout"
                       : item.status === "not-checked"
-                        ? "not checked"
+                        ? isPt
+                          ? "não verificado"
+                          : "not checked"
                         : `${item.latencyMs}ms`}
                   </span>
                   {item.databaseSize && (
@@ -832,7 +841,9 @@ function FleetHealthSection({
                   {item.activeConnections !== undefined && (
                     <>
                       <span className="text-fg-faint">&middot;</span>
-                      <span className="font-mono text-fg-tertiary">{item.activeConnections} conn</span>
+                      <span className="font-mono text-fg-tertiary">
+                        {item.activeConnections} {isPt ? "conx" : "conn"}
+                      </span>
                     </>
                   )}
                 </div>
@@ -867,29 +878,30 @@ function KeyMetricsSection({
   todayQueries: number;
   yesterdayQueries: number;
 }) {
+  const { isPt } = useTranslation();
   return (
     <motion.div variants={itemVariants}>
       <div className="flex items-center gap-2 mb-3">
         <Gauge className="h-4 w-4 text-brand" />
-        <h2 className="text-sm font-bold text-fg-secondary">Key Metrics</h2>
+        <h2 className="text-sm font-bold text-fg-secondary">{isPt ? "Métricas Principais" : "Key Metrics"}</h2>
       </div>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <MetricGauge
-          label="Query Success"
+          label={isPt ? "Sucesso de Consultas" : "Query Success"}
           value={queryStats.successRate ?? 0}
           displayValue={queryStats.successRate === null ? "N/A" : undefined}
           unit={queryStats.successRate === null ? "" : "%"}
           color={queryStats.successRate === null ? NEUTRAL_GAUGE_COLOR : getGaugeColor(queryStats.successRate)}
         />
         <MetricGauge
-          label="Fleet Health"
+          label={isPt ? "Saúde dos Servidores" : "Fleet Health"}
           value={healthScore ?? 0}
           displayValue={healthScore === null ? "N/A" : undefined}
           unit={healthScore === null ? "" : "%"}
           color={healthScore === null ? NEUTRAL_GAUGE_COLOR : getGaugeColor(healthScore)}
         />
         <MetricGauge
-          label="Avg Response"
+          label={isPt ? "Tempo Médio" : "Avg Response"}
           value={Math.min(avgLatency ?? 0, 500)}
           displayValue={avgLatency === null ? "N/A" : `${avgLatency}`}
           unit={avgLatency === null ? "" : "ms"}
@@ -897,7 +909,7 @@ function KeyMetricsSection({
           color={avgLatency === null ? NEUTRAL_GAUGE_COLOR : getGaugeColorReverse(avgLatency)}
         />
         <MetricBigNumber
-          label="Total Queries"
+          label={isPt ? "Total de Consultas" : "Total Queries"}
           value={queryStats.total}
           trend={todayQueries - yesterdayQueries}
           icon={Zap}
@@ -966,6 +978,7 @@ function MetricBigNumber({
   trend: number;
   icon: React.ComponentType<{ className?: string }>;
 }) {
+  const { isPt } = useTranslation();
   const animatedValue = useAnimatedCounter(value);
 
   return (
@@ -980,7 +993,7 @@ function MetricBigNumber({
           {trend > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
           <span>
             {trend > 0 ? "+" : ""}
-            {trend} today
+            {trend} {isPt ? "hoje" : "today"}
           </span>
         </div>
       )}
@@ -997,6 +1010,7 @@ function AnalyticsSection({
   queryStats: { total: number; byDay: { day: string; success: number; fail: number }[] };
   activityFeed: ActivityFeedItem[];
 }) {
+  const { isPt } = useTranslation();
   const tooltipStyle = chartTooltipStyle(useEffectiveTheme());
 
   return (
@@ -1006,10 +1020,12 @@ function AnalyticsSection({
         <div className="rounded-xl border border-hairline bg-panel p-5">
           <h3 className="text-sm font-bold text-fg-secondary mb-4 flex items-center gap-2">
             <Activity className="h-4 w-4 text-brand" />
-            Query Volume (7 days)
+            {isPt ? "Volume de Consultas (7 dias)" : "Query Volume (7 days)"}
           </h3>
           {queryStats.total === 0 ? (
-            <div className="flex items-center justify-center py-8 text-sm text-fg-subtle">No query history yet.</div>
+            <div className="flex items-center justify-center py-8 text-sm text-fg-subtle">
+              {isPt ? "Nenhum histórico de consultas ainda." : "No query history yet."}
+            </div>
           ) : (
             <div className="h-[200px]">
               <ResponsiveContainer width="100%" height="100%">
@@ -1036,7 +1052,7 @@ function AnalyticsSection({
                   <Area
                     type="monotone"
                     dataKey="success"
-                    name="Success"
+                    name={isPt ? "Sucesso" : "Success"}
                     stroke="#10b981"
                     strokeWidth={2}
                     fill="url(#gradSuccess)"
@@ -1046,7 +1062,7 @@ function AnalyticsSection({
                   <Area
                     type="monotone"
                     dataKey="fail"
-                    name="Failed"
+                    name={isPt ? "Falhas" : "Failed"}
                     stroke="#ef4444"
                     strokeWidth={2}
                     fill="url(#gradFail)"
@@ -1064,7 +1080,7 @@ function AnalyticsSection({
           <div className="mb-4 flex items-center justify-between gap-2">
             <h3 className="text-sm font-bold text-fg-secondary flex items-center gap-2">
               <Clock className="h-4 w-4 text-brand" />
-              Recent Activity
+              {isPt ? "Atividade Recente" : "Recent Activity"}
             </h3>
             {/* Unconditional: the preview cannot show proxy-recorded boundary denials, so the
                 Audit tab's scope disclosure must stay one click away in every feed state. */}
@@ -1073,7 +1089,7 @@ function AnalyticsSection({
               data-testid="overview-audit-link"
               className="inline-flex items-center gap-1 text-xs text-fg-subtle hover:text-fg-tertiary transition-colors"
             >
-              Audit
+              {isPt ? "Auditoria" : "Audit"}
               <ArrowRight className="h-3 w-3" aria-hidden="true" />
             </Link>
           </div>
@@ -1082,7 +1098,9 @@ function AnalyticsSection({
               data-testid="overview-recent-activity-empty"
               className="flex items-center justify-center py-8 text-sm text-fg-subtle"
             >
-              No recent activity here. The Audit tab explains what this feed does not capture.
+              {isPt
+                ? "Nenhuma atividade recente aqui. A aba Auditoria explica o que este feed não captura."
+                : "No recent activity here. The Audit tab explains what this feed does not capture."}
             </div>
           ) : (
             <div className="max-h-[260px] overflow-y-auto editor-scrollbar space-y-1">
@@ -1129,10 +1147,13 @@ function AnalyticsSection({
 // ─── SECTION 5: Quick Actions ────────────────────────────────────────────────
 
 function QuickActionsSection() {
+  const { isPt } = useTranslation();
   const actions = [
     {
-      label: "Maintenance",
-      description: "VACUUM, ANALYZE, and optimize your databases",
+      label: isPt ? "Manutenção" : "Maintenance",
+      description: isPt
+        ? "VACUUM, ANALYZE e otimize seus bancos de dados"
+        : "VACUUM, ANALYZE, and optimize your databases",
       icon: Wrench,
       href: "/admin/operations",
       gradient: "from-blue-500/20 to-cyan-500/20",
@@ -1140,8 +1161,10 @@ function QuickActionsSection() {
       borderColor: "hover:border-hue-blue-tint/30",
     },
     {
-      label: "Security & Masking",
-      description: "Configure data masking rules and access control",
+      label: isPt ? "Segurança e Mascaramento" : "Security & Masking",
+      description: isPt
+        ? "Configure regras de mascaramento e controle de acesso"
+        : "Configure data masking rules and access control",
       icon: Shield,
       href: "/admin/security",
       gradient: "from-emerald-500/20 to-teal-500/20",
@@ -1149,8 +1172,10 @@ function QuickActionsSection() {
       borderColor: "hover:border-hue-emerald-tint/30",
     },
     {
-      label: "Real-time Monitoring",
-      description: "Live metrics, connection pools, and alert thresholds",
+      label: isPt ? "Monitoramento em Tempo Real" : "Real-time Monitoring",
+      description: isPt
+        ? "Métricas em tempo real, pools de conexões e limites de alerta"
+        : "Live metrics, connection pools, and alert thresholds",
       icon: Activity,
       href: "/admin/monitoring",
       gradient: "from-purple-500/20 to-pink-500/20",
@@ -1163,7 +1188,9 @@ function QuickActionsSection() {
     <motion.div variants={itemVariants}>
       <div className="flex items-center gap-2 mb-3">
         <Sparkles className="h-4 w-4 text-brand" />
-        <h2 className="text-sm font-bold text-fg-secondary">Quick Actions</h2>
+        <h2 className="text-sm font-bold text-fg-secondary">
+          {isPt ? "Ações Rápidas" : "Quick Actions"}
+        </h2>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {actions.map((action) => (
@@ -1185,7 +1212,7 @@ function QuickActionsSection() {
               <h3 className="text-sm font-bold text-fg mb-1">{action.label}</h3>
               <p className="text-xs text-fg-muted mb-3">{action.description}</p>
               <div className="flex items-center gap-1 text-xs text-fg-subtle group-hover:text-fg-tertiary transition-colors">
-                <span>Open</span>
+                <span>{isPt ? "Abrir" : "Open"}</span>
                 <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
               </div>
             </div>

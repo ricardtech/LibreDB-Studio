@@ -6,6 +6,30 @@ O formato é baseado no [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ---
 
+## [2.0.2-ricardtech] - 03/11/2026
+
+### 🌐 Internacionalização Completa (100% pt-BR)
+- **Painel Administrativo & Operações:**
+  - Tradução integral da aba **Operações**: *Operações Globais*, cartões de ação (*Atualizar Estatísticas / Executar Analyze, Recuperar Espaço / Executar Vacuum, Reconstruir Índices / Executar Reindex*), avisos de segurança de recursos e estatísticas detalhadas de *Tabelas* (inchaço/bloat, linhas) e *Sessões* (Ativas, Ociosas, Em Transação, Em Espera).
+  - Tradução integral da aba **Contas**: cabeçalhos, formulário de adição, selos de papel/permissão (*Admin, Usuário, Somente Leitura*), status de 2FA, Chaves de Acesso (*Passkeys*) e datação localizada.
+  - Tradução dos componentes de segurança: autenticador 2FA (*Seu autenticador, Senha atual, Configurar autenticador*) e chaves de acesso biométricas (*Passkeys*).
+  - Tradução integral da aba **Auditoria**: sub-abas (*Operações, Consultas, Estatísticas*), filtros de tipo, busca, taxa de sucesso, aviso de proxy e estados vazios.
+  - Tradução integral da aba **Visão Geral**: cartões de métricas principais, volume de consultas (7 dias), atividades recentes e ações rápidas de manutenção.
+- **Visualizador ERD (Diagrama de Entidade-Relacionamento):**
+  - Tradução do cabeçalho, contagem de relações (*tabelas, views, relacionamentos*), filtro de busca (*Filtrar tabelas...*), aviso heurístico de integridade referencial (*Sem chaves estrangeiras disponíveis*), alternador *Compacto / Detalhes* e rótulos de nós.
+- **Modal de Conexão:**
+  - Tradução completa dos modais de criação e edição: *Nova Conexão, Editar Conexão, Colar URL de Conexão, Tempo Limite de Consulta, Ignorar catálogo inicial, Cancelar, Testar Conexão, Conectando...*.
+- **Painel de Monitoramento:**
+  - Tradução completa do cabeçalho e todas as sub-abas (*Visão Geral, Desempenho, Consultas, Sessões, Tabelas, Armazenamento, Pool*), seções de acerto de cache (*Cache Hit Ratio*), *Estatísticas Rápidas* e sumário de desempenho.
+- **Barra de Resultados & Objetos:**
+  - Tradução dinâmica da barra inferior de estatísticas (*X linhas, colunas, carregar mais, limitado*).
+  - Tradução do painel de leitura adiada na árvore de objetos para conexões sob demanda.
+
+### 🔗 Repositório Oficial do Fork
+- Redirecionamento completo de todos os links de cabeçalho, rodapé e versão clicável na barra lateral diretamente para o repositório oficial do fork: [github.com/ricardtech/LibreDB-Studio](https://github.com/ricardtech/LibreDB-Studio).
+
+---
+
 ## [2.0.1-ricardtech] - 03/11/2026
 
 ### 🐛 Correções de Compatibilidade (ClickHouse)

@@ -48,6 +48,7 @@ import {
   fieldHintId,
 } from "@/components/ConnectionFieldControl";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslation } from "@/lib/i18n";
 import { CONNECTION_FORM_DEFAULTS, useConnectionForm } from "@/hooks/use-connection-form";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { WireCompatibilityHint } from "@/components/WireCompatibilityHint";
@@ -130,6 +131,7 @@ export function ConnectionModal({
   editConnection,
   onTestConnection,
 }: ConnectionModalProps) {
+  const { t, isPt } = useTranslation();
   const isMobile = useIsMobile();
   const {
     // Connection fields
@@ -304,14 +306,19 @@ export function ConnectionModal({
               <Zap strokeWidth={1.5} className="w-5 h-5 text-brand" />
             </div>
             <h2 className="text-xs md:text-[0.8125rem] font-medium">
-              {isEditMode ? "Edit Connection" : "New Connection"}
+              {isEditMode
+                ? t("connectionModal.editConnection", "Edit Connection")
+                : t("connectionModal.newConnection", "New Connection")}
             </h2>
           </div>
           <div className="flex items-center justify-between">
             <p className="text-xs text-fg-muted">
               {isEditMode
-                ? "Update your database connection parameters."
-                : "Configure your database connection parameters securely."}
+                ? t("connectionModal.editConnectionSubtitle", "Update your database connection parameters.")
+                : t(
+                    "connectionModal.newConnectionSubtitle",
+                    "Configure your database connection parameters securely.",
+                  )}
             </p>
             {!isEditMode && (
               <button
@@ -319,7 +326,7 @@ export function ConnectionModal({
                 className="flex items-center gap-1.5 text-xs font-medium text-brand hover:text-brand-bright transition-colors px-2 py-1 rounded-md hover:bg-brand-tint/10"
               >
                 <ClipboardPaste strokeWidth={1.5} className="w-3 h-3" />
-                Paste URL
+                {t("connectionModal.pasteUrl", "Paste URL")}
               </button>
             )}
           </div>
@@ -335,7 +342,9 @@ export function ConnectionModal({
               className="mb-6 overflow-hidden"
             >
               <div className="p-3 rounded-lg border border-brand-tint/20 bg-brand-tint/5 space-y-2">
-                <Label className="text-xs font-medium text-brand">Paste Connection URL</Label>
+                <Label className="text-xs font-medium text-brand">
+                  {t("connectionModal.pasteUrlTitle", "Paste Connection URL")}
+                </Label>
                 <div className="flex gap-2">
                   <Input
                     value={pasteInput}
@@ -371,7 +380,7 @@ export function ConnectionModal({
             <div className="flex items-center gap-2 mb-1">
               <Database strokeWidth={1.5} className="w-3 h-3 text-fg-muted" />
               <Label htmlFor="name" className="text-xs font-medium text-fg-muted">
-                Connection Name
+                {t("connectionModal.connectionName", "Connection Name")}
               </Label>
             </div>
             <Input
@@ -385,7 +394,7 @@ export function ConnectionModal({
 
           <div className="space-y-2">
             <Label htmlFor="queryTimeout" className="text-xs font-medium text-fg-muted">
-              Query Timeout (ms)
+              {t("connectionModal.queryTimeout", "Query Timeout (ms)")}
             </Label>
             <Input
               id="queryTimeout"
@@ -400,7 +409,7 @@ export function ConnectionModal({
               className="h-10 bg-panel border-hairline focus:border-brand-tint/50 transition-all text-xs"
             />
             <p id="queryTimeout-hint" className="text-xs text-fg-muted">
-              Leave blank to use the default of 60 seconds.
+              {t("connectionModal.timeoutHint", "Leave blank to use the default of 60 seconds.")}
             </p>
           </div>
 
@@ -420,10 +429,15 @@ export function ConnectionModal({
                 aria-describedby="skipObjectScan-hint"
                 className="rounded border-edge bg-panel"
               />
-              <span className="text-xs font-medium text-fg-muted">Do not read the object list on connect</span>
+              <span className="text-xs font-medium text-fg-muted">
+                {t("connectionModal.skipObjectScan", "Do not read the object list on connect")}
+              </span>
             </label>
             <p id="skipObjectScan-hint" className="text-xs text-fg-muted">
-              The editor still works. The object panel offers a load action instead.
+              {t(
+                "connectionModal.skipObjectScanHint",
+                "The editor still works. The object panel offers a load action instead.",
+              )}
             </p>
           </div>
 
@@ -1177,7 +1191,7 @@ export function ConnectionModal({
             onClick={onClose}
             className="w-full md:w-auto text-fg-muted hover:text-fg hover:bg-fill text-xs font-medium"
           >
-            Cancel
+            {t("connectionModal.cancel", "Cancel")}
           </Button>
           <div className="flex flex-col gap-2 md:flex-row md:items-center md:gap-2">
             <Button
@@ -1190,10 +1204,10 @@ export function ConnectionModal({
                 <div className="flex items-center gap-2">
                   {/* On an outline button, so the spinner follows the text ramp. */}
                   <div className="w-3 h-3 border-2 border-fg-tertiary/30 border-t-fg-tertiary rounded-full animate-spin" />
-                  Testing...
+                  {isPt ? "Testando..." : "Testing..."}
                 </div>
               ) : (
-                "Test Connection"
+                t("connectionModal.testConnection", "Test Connection")
               )}
             </Button>
             <Button
@@ -1215,10 +1229,14 @@ export function ConnectionModal({
                 <div className="flex items-center gap-2">
                   {/* Inside a solid blue button: white is right on either ground. */}
                   <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  Connecting...
+                  {isPt ? "Conectando..." : "Connecting..."}
                 </div>
               ) : (
-                <div className="flex items-center gap-2">{isEditMode ? "Save Changes" : "Establish Connection"}</div>
+                <div className="flex items-center gap-2">
+                  {isEditMode
+                    ? t("connectionModal.saveChanges", "Save Changes")
+                    : t("connectionModal.establishConnection", "Establish Connection")}
+                </div>
               )}
             </Button>
           </div>

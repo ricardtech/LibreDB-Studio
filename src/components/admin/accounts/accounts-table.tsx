@@ -14,6 +14,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import type { PublicAccount } from "@/lib/local-accounts";
+import { useTranslation } from "@/lib/i18n";
 import type { AccountActions } from "./account-dialogs";
 import {
   formatCreated,
@@ -124,16 +125,17 @@ export function AccountsTable({
   isMe: (account: PublicAccount) => boolean;
   actions: AccountActions;
 }) {
+  const { isPt } = useTranslation();
   return (
     <Table>
       <TableHeader>
         <TableRow className="border-hairline hover:bg-transparent">
           <TableHead className={cn(HEAD, "pl-4")}>Email</TableHead>
-          <TableHead className={cn(HEAD, "hidden md:table-cell")}>Role</TableHead>
+          <TableHead className={cn(HEAD, "hidden md:table-cell")}>{isPt ? "Papel" : "Role"}</TableHead>
           <TableHead className={cn(HEAD, "hidden md:table-cell")}>Status</TableHead>
-          <TableHead className={cn(HEAD, "hidden md:table-cell")}>Two-factor</TableHead>
-          <TableHead className={cn(HEAD, "hidden md:table-cell")}>Passkeys</TableHead>
-          <TableHead className={cn(HEAD, "hidden lg:table-cell")}>Created</TableHead>
+          <TableHead className={cn(HEAD, "hidden md:table-cell")}>{isPt ? "Dois Fatores" : "Two-factor"}</TableHead>
+          <TableHead className={cn(HEAD, "hidden md:table-cell")}>{isPt ? "Chaves de Acesso" : "Passkeys"}</TableHead>
+          <TableHead className={cn(HEAD, "hidden lg:table-cell")}>{isPt ? "Criado em" : "Created"}</TableHead>
           <TableHead className="w-12 pr-3">
             <span className="sr-only">Actions</span>
           </TableHead>
@@ -150,29 +152,29 @@ export function AccountsTable({
                 >
                   {account.email}
                 </span>
-                {isMe(account) ? <YouTag /> : null}
+                {isMe(account) ? <YouTag isPt={isPt} /> : null}
               </div>
               <div className="mt-2 flex flex-wrap items-center gap-1.5 md:hidden">
-                <RoleBadge role={account.role} />
-                <StatusBadge disabled={account.disabled} />
-                {account.totpEnabled ? <TwoFactorStatus enabled className="ml-1" /> : null}
-                {account.passkeys > 0 ? <PasskeyBadge count={account.passkeys} /> : null}
+                <RoleBadge role={account.role} isPt={isPt} />
+                <StatusBadge disabled={account.disabled} isPt={isPt} />
+                {account.totpEnabled ? <TwoFactorStatus enabled isPt={isPt} className="ml-1" /> : null}
+                {account.passkeys > 0 ? <PasskeyBadge count={account.passkeys} isPt={isPt} /> : null}
               </div>
             </TableCell>
             <TableCell className="hidden py-3 md:table-cell">
-              <RoleBadge role={account.role} />
+              <RoleBadge role={account.role} isPt={isPt} />
             </TableCell>
             <TableCell className="hidden py-3 md:table-cell">
-              <StatusBadge disabled={account.disabled} />
+              <StatusBadge disabled={account.disabled} isPt={isPt} />
             </TableCell>
             <TableCell className="hidden py-3 md:table-cell">
-              <TwoFactorStatus enabled={account.totpEnabled} />
+              <TwoFactorStatus enabled={account.totpEnabled} isPt={isPt} />
             </TableCell>
             <TableCell data-testid={`passkeys-${account.email}`} className="hidden py-3 md:table-cell">
-              <PasskeyCount count={account.passkeys} />
+              <PasskeyCount count={account.passkeys} isPt={isPt} />
             </TableCell>
             <TableCell className="hidden py-3 text-xs text-fg-muted tabular-nums lg:table-cell">
-              {formatCreated(account.createdAt)}
+              {formatCreated(account.createdAt, isPt)}
             </TableCell>
             <TableCell className="py-3 pr-3 text-right">
               <RowMenu account={account} actions={actions} />

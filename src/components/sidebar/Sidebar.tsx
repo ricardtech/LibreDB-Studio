@@ -17,6 +17,8 @@ import { KeyBrowser, type KeyPatternRequest } from "@/components/key-browser";
 import { prefixPattern } from "@/components/key-browser/tree";
 import { containerDepth, enumerableKinds } from "@/lib/db/object-kinds";
 import { GitHubRepoLink } from "@/components/github-repo-link";
+import { REPO_URL } from "@/lib/community/repo";
+import { useTranslation } from "@/lib/i18n";
 import { getAppVersion } from "@/lib/app-version";
 import { cn } from "@/lib/utils";
 import { ConnectionsList } from "./ConnectionsList";
@@ -217,6 +219,7 @@ export const Sidebar = React.memo(function Sidebar({
   onContainerActivate,
   onOpenKey,
 }: SidebarProps) {
+  const { t } = useTranslation();
   const appVersion = getAppVersion();
   const notChecked = connectionPulse === "not-checked";
   /**
@@ -430,7 +433,7 @@ export const Sidebar = React.memo(function Sidebar({
             <button
               className="p-1 rounded hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
               onClick={onShowDiagram}
-              title="Show ERD Diagram"
+              title={t("sidebar.showErd", "Show ERD Diagram")}
             >
               <Layers strokeWidth={1.5} className="w-3.5 h-3.5" />
             </button>
@@ -438,8 +441,8 @@ export const Sidebar = React.memo(function Sidebar({
           {onAddConnection && (
             <button
               className="p-1 rounded hover:bg-accent text-muted-foreground hover:text-foreground transition-colors"
-              aria-label="New connection"
-              title="New connection"
+              aria-label={t("sidebar.newConnection", "New connection")}
+              title={t("sidebar.newConnection", "New connection")}
               onClick={onAddConnection}
             >
               <Plus strokeWidth={1.5} className="w-3.5 h-3.5" />
@@ -592,7 +595,9 @@ export const Sidebar = React.memo(function Sidebar({
               className="flex flex-col items-center justify-center py-12 text-muted-foreground"
             >
               <LoaderCircle strokeWidth={1.5} className="w-6 h-6 animate-spin text-brand/40" />
-              <span className="mt-3 text-xs font-medium">Reading the connection...</span>
+              <span className="mt-3 text-xs font-medium">
+                {t("sidebar.readingConnection", "Reading the connection...")}
+              </span>
             </div>
           )}
         </div>
@@ -612,7 +617,7 @@ export const Sidebar = React.memo(function Sidebar({
               )}
             />
             <span className="text-xs font-medium text-muted-foreground">
-              {notChecked ? "Not checked" : "Connected"}
+              {notChecked ? t("sidebar.notChecked", "Not checked") : t("sidebar.connected", "Connected")}
             </span>
           </div>
           <div className="flex items-center gap-2">
@@ -623,7 +628,17 @@ export const Sidebar = React.memo(function Sidebar({
               every user rather than only the standalone ones.
             */}
             <GitHubRepoLink className="text-muted-foreground/70 hover:text-foreground" />
-            {appVersion && <span className="text-xs font-mono text-muted-foreground/70">v{appVersion}</span>}
+            {appVersion && (
+              <a
+                href={REPO_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs font-mono text-muted-foreground/70 hover:text-foreground hover:underline transition-colors"
+                title="ricardtech/LibreDB-Studio"
+              >
+                v{appVersion}
+              </a>
+            )}
           </div>
         </div>
       </div>

@@ -21,6 +21,7 @@
  * (never from mounted rows), drawn by `StickyStrip`, and its arithmetic is `sticky-rows.ts`.
  */
 
+import { useTranslation } from "@/lib/i18n";
 import {
   useCallback,
   useDeferredValue,
@@ -199,6 +200,7 @@ export function ObjectTree({
   refreshToken = 0,
   ref,
 }: ObjectTreeProps) {
+  const { t } = useTranslation();
   const columnsReadable = source === undefined || readsColumns === true;
   // Held per connection, so a switch starts unfiltered without an effect to reset it (D7).
   const [filter, setFilter] = useState<{
@@ -610,7 +612,10 @@ export function ObjectTree({
         <p className="text-xs text-muted-foreground leading-relaxed">
           {deferredForBilledCompute === true
             ? BILLED_COMPUTE_HOLD
-            : "This connection opens without reading its catalog. The editor is ready to use."}
+            : t(
+                "tree.deferredNotice",
+                "This connection opens without reading its catalog. The editor is ready to use.",
+              )}
         </p>
         {onLoad !== undefined && (
           <button
@@ -619,7 +624,7 @@ export function ObjectTree({
             onClick={onLoad}
             className="mt-3 rounded-md bg-brand-solid hover:bg-brand-solid-hover text-white px-3 py-1.5 text-xs font-medium transition-colors"
           >
-            Load objects
+            {t("tree.loadObjects", "Load objects")}
           </button>
         )}
       </TreePanel>

@@ -20,6 +20,7 @@ import {
 import { Button } from "@/components/ui/button";
 import type { CellChange } from "@/components/ResultsGrid";
 import { describeWarning } from "@/components/results-grid/utils";
+import { useTranslation } from "@/lib/i18n";
 
 const MASKED_LABEL = "masked";
 const LOADING_LABEL = "Loading...";
@@ -194,6 +195,7 @@ export function StatsBar({
   hiddenColumns,
   onToggleColumn,
 }: StatsBarProps) {
+  const { t, isPt } = useTranslation();
   const [columnMenuOpen, setColumnMenuOpen] = useState(false);
   /*
     The ref goes on the span that holds the trigger AND the menu, so pressing the trigger
@@ -204,8 +206,10 @@ export function StatsBar({
   const hiddenCount = hiddenColumns?.size ?? 0;
   const columnLabel =
     hiddenCount > 0
-      ? `${result.fields.length - hiddenCount} of ${result.fields.length} columns`
-      : `${result.fields.length} columns`;
+      ? isPt
+        ? `${result.fields.length - hiddenCount} de ${result.fields.length} colunas`
+        : `${result.fields.length - hiddenCount} of ${result.fields.length} columns`
+      : `${result.fields.length} ${isPt ? "colunas" : "columns"}`;
   const warningDetail = warnings.map(describeWarning).join("\n");
   /*
    * ONE ROW PER WARNING, KEYED UNIQUELY, which neither of the two obvious keys is. The index alone
@@ -230,7 +234,7 @@ export function StatsBar({
         <div className="flex items-center gap-4">
           <span className="flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 rounded-full bg-success-tint/50" />
-            {result.rows.length} rows
+            {result.rows.length} {t("results.rows", "rows")}
             {/*
             THE LOAD MORE CONTROL (#816). It stands where the "(more available)" text
             stood: the same fact, now the thing you click, so the grid gains no chrome
@@ -253,12 +257,12 @@ export function StatsBar({
                   {isLoadingMore ? (
                     <>
                       <LoaderCircle strokeWidth={1.5} className="w-3 h-3 animate-spin" />
-                      {LOADING_LABEL}
+                      {isPt ? "Carregando..." : LOADING_LABEL}
                     </>
                   ) : (
                     <>
                       <ChevronDown strokeWidth={1.5} className="w-3 h-3" />
-                      {loadMoreLabel(pageOffer.pageSize)}
+                      {isPt ? `carregar mais ${pageOffer.pageSize}` : loadMoreLabel(pageOffer.pageSize)}
                     </>
                   )}
                 </button>
@@ -349,7 +353,13 @@ export function StatsBar({
               The filter count survives for a screen reader, which cannot see either funnel.
             */}
               <span data-testid="filter-summary">
-                {pageOffer ? `${filteredRowCount} of ${result.rows.length}` : `${filteredRowCount} shown`}
+                {pageOffer
+                  ? isPt
+                    ? `${filteredRowCount} de ${result.rows.length}`
+                    : `${filteredRowCount} of ${result.rows.length}`
+                  : isPt
+                    ? `${filteredRowCount} exibidas`
+                    : `${filteredRowCount} shown`}
               </span>
               <span className="sr-only">
                 , {activeFilterCount} column filter{activeFilterCount > 1 ? "s" : ""} active
@@ -358,8 +368,15 @@ export function StatsBar({
             </button>
           )}
           {result.pagination?.wasLimited && (
-            <span className="text-brand text-xs bg-brand-tint/10 px-2 py-0.5 rounded" title={AUTO_LIMIT_NOTICE}>
-              {AUTO_LIMIT_BADGE}
+            <span
+              className="text-brand text-xs bg-brand-tint/10 px-2 py-0.5 rounded"
+              title={
+                isPt
+                  ? "O Studio limitou este resultado. Qualquer dado além do limite não foi retornado."
+                  : AUTO_LIMIT_NOTICE
+              }
+            >
+              {isPt ? "limitado" : AUTO_LIMIT_BADGE}
               <span className="sr-only">: {AUTO_LIMIT_NOTICE}</span>
             </span>
           )}

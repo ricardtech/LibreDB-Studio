@@ -28,6 +28,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
 import { appFetch } from "@/lib/config/base-path";
 import type { PasskeyStatus, PublicPasskey } from "@/lib/passkey/api-types";
+import { useTranslation } from "@/lib/i18n";
 import {
   beginPasskeyCreation,
   finishPasskeyCreation,
@@ -425,6 +426,7 @@ function PasskeyRow({
 
 /** `onChange` hears every add, rename and remove, so a page showing the passkey count can re-read it. */
 export function PasskeySettings({ reloadSignal, onChange }: { reloadSignal: number; onChange?: () => void }) {
+  const { t, isPt } = useTranslation();
   const [view, setView] = useState<View>({ kind: "loading" });
   const [reload, setReload] = useState(0);
   const [openings, setOpenings] = useState(0);
@@ -485,16 +487,23 @@ export function PasskeySettings({ reloadSignal, onChange }: { reloadSignal: numb
     const status = view.status;
     // Loaded state exists only after mount, so reading the page's own address here never runs on the server.
     const blocker = passkeyPageBlocker();
+    const formatReason = (reason: string) => {
+      if (isPt && reason.includes("Passkeys are off on this server")) {
+        return t("accounts.passkeysOffNotice", reason);
+      }
+      return reason;
+    };
+
     // A sign-in mode that turns passkeys off is named before a page blocker: no other address would help.
     if (!status.available && (status.mode === "oidc" || status.mode === "openshift")) {
-      body = <Reason text={status.reason} />;
+      body = <Reason text={formatReason(status.reason)} />;
     } else if (blocker !== null) {
       body = <Reason text={blocker === "ip-address" ? PAGE_IP_ADDRESS : PAGE_PLAIN_HTTP} />;
     } else if (!status.available) {
-      body = <Reason text={status.reason} />;
+      body = <Reason text={formatReason(status.reason)} />;
     } else {
       let add: React.ReactNode;
-      if (!status.canAdd) add = <Reason text={status.reason} />;
+      if (!status.canAdd) add = <Reason text={formatReason(status.reason)} />;
       else if (!passkeysUsableHere(status.origin)) {
         // A wrong address is named first: on the right one, the only remaining cause is the browser.
         const here = window.location.origin;
@@ -515,7 +524,7 @@ export function PasskeySettings({ reloadSignal, onChange }: { reloadSignal: numb
             className="justify-self-start border-hairline-strong"
             onClick={() => setAdding(opening(null))}
           >
-            Add passkey
+            {isPt ? "Adicionar chave de acesso" : "Add passkey"}
           </Button>
         );
       }
@@ -528,7 +537,9 @@ export function PasskeySettings({ reloadSignal, onChange }: { reloadSignal: numb
             </p>
           ) : null}
           {status.passkeys.length === 0 ? (
-            <p className="text-sm text-fg-muted">No passkeys yet. Add one on each device you sign in from.</p>
+            <p className="text-sm text-fg-muted">
+              {t("accounts.noPasskeysYet", "No passkeys yet. Add one on each device you sign in from.")}
+            </p>
           ) : (
             <ul className="divide-y divide-hairline">
               {status.passkeys.map((passkey) => (
@@ -600,10 +611,13 @@ export function PasskeySettings({ reloadSignal, onChange }: { reloadSignal: numb
     <section aria-labelledby="passkeys-heading" className="@container rounded-xl border border-hairline bg-panel">
       <div className="space-y-1 p-5">
         <h3 id="passkeys-heading" className="text-sm font-semibold text-fg">
-          Passkeys
+          {t("accounts.passkeysTitle", "Passkeys")}
         </h3>
         <p className="text-sm text-fg-muted">
-          Sign in with your fingerprint, face or device PIN instead of a password and code.
+          {t(
+            "accounts.passkeysDesc",
+            "Sign in with your fingerprint, face or device PIN instead of a password and code.",
+          )}
         </p>
       </div>
       <div className="border-t border-hairline p-5">{body}</div>

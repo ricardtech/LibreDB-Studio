@@ -24,6 +24,7 @@ import { Download, Info, LoaderCircle, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "@/lib/i18n";
 import { logger } from "@/lib/logger";
 import { DiagramActionsContext, type DiagramActions } from "./schema-diagram/diagram-context";
 import { FkEdge } from "./schema-diagram/FkEdge";
@@ -98,6 +99,7 @@ const DIAGRAM_THEME = {
 } as const;
 
 function SchemaDiagramInner({ schema, onClose, capabilities }: SchemaDiagramProps) {
+  const { t, isPt } = useTranslation();
   const mode = useEffectiveTheme();
   const diagram = DIAGRAM_THEME[mode];
   const [selectedNode, setSelectedNode] = useState<string | null>(null);
@@ -365,9 +367,13 @@ function SchemaDiagramInner({ schema, onClose, capabilities }: SchemaDiagramProp
   // dashed heuristic edges because no FK is usable within it.
   const schemaHasFkData = relations.some((t) => (t.foreignKeys || []).length > 0);
   const showHeuristicWarning = graph.usedHeuristic || !schemaHasFkData;
-  const heuristicWarningText = graph.usedHeuristic
-    ? `${schemaHasFkData ? "No usable FK relationships in this view." : "No FK data available."} Showing heuristic relationships (dashed).`
-    : "No FK data available.";
+  const heuristicWarningText = isPt
+    ? graph.usedHeuristic
+      ? `${schemaHasFkData ? "Sem relacionamentos de FK utilizáveis nesta visualização." : "Nenhum dado de chave estrangeira disponível."} Exibindo relacionamentos heurísticos (tracejados).`
+      : "Nenhum dado de chave estrangeira disponível."
+    : graph.usedHeuristic
+      ? `${schemaHasFkData ? "No usable FK relationships in this view." : "No FK data available."} Showing heuristic relationships (dashed).`
+      : "No FK data available.";
 
   if (relations.length === 0) {
     return (
@@ -457,14 +463,14 @@ function SchemaDiagramInner({ schema, onClose, capabilities }: SchemaDiagramProp
                   className={`bg-raised border-hairline-strong hover:bg-fill text-xs ${compactMode ? "text-brand" : ""}`}
                   onClick={() => setCompactMode(!compactMode)}
                 >
-                  {compactMode ? "Detail" : "Compact"}
+                  {compactMode ? (isPt ? "Detalhes" : "Detail") : (isPt ? "Compacto" : "Compact")}
                 </Button>
                 <Button
                   variant="outline"
                   size="icon"
                   className="rounded-full bg-raised border-hairline-strong hover:bg-fill"
                   onClick={onClose}
-                  aria-label="Close schema diagram"
+                  aria-label={isPt ? "Fechar diagrama do esquema" : "Close schema diagram"}
                 >
                   <X strokeWidth={1.5} className="w-3.5 h-3.5" />
                 </Button>
@@ -476,11 +482,13 @@ function SchemaDiagramInner({ schema, onClose, capabilities }: SchemaDiagramProp
               <div className="bg-raised/80 backdrop-blur-md border border-hairline-strong p-3 rounded-xl shadow-2xl space-y-2">
                 <h3 className="text-xs font-medium text-fg mb-1 flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full bg-brand-tint animate-pulse" />
-                  ERD Visualizer
+                  {isPt ? "Visualizador ERD" : "ERD Visualizer"}
                 </h3>
                 <div className="flex items-center gap-3 text-xs text-fg-muted">
-                  <span>{relationCountLabel(filteredSchema, capabilities)}</span>
-                  <span>{graph.edgeCount} relationships</span>
+                  <span>{relationCountLabel(filteredSchema, capabilities, isPt)}</span>
+                  <span>
+                    {graph.edgeCount} {isPt ? "relacionamentos" : "relationships"}
+                  </span>
                   {isLayouting && (
                     <span className="flex items-center gap-1 text-fg-subtle">
                       <LoaderCircle strokeWidth={1.5} className="w-3 h-3 animate-spin" />
@@ -497,7 +505,7 @@ function SchemaDiagramInner({ schema, onClose, capabilities }: SchemaDiagramProp
                   />
                   <input
                     type="text"
-                    placeholder="Filter tables..."
+                    placeholder={isPt ? "Filtrar tabelas..." : "Filter tables..."}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="w-full pl-7 pr-2 py-1.5 bg-fill border border-hairline-strong rounded text-xs text-fg-secondary placeholder:text-fg-subtle focus:outline-none focus:border-brand-tint/50"

@@ -13,6 +13,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { appFetch } from "@/lib/config/base-path";
 import { cn } from "@/lib/utils";
 import type { OwnFactorStatus } from "@/lib/local-accounts";
+import { useTranslation } from "@/lib/i18n";
 
 /**
  * The signed-in account's own authenticator (#784). Shared by the admin Accounts tab and
@@ -82,6 +83,7 @@ function Step({ index, title, children }: { index: number; title: string; childr
 
 /** `onChange` runs after the authenticator turns on or off, so the passkey section below can reload. */
 export function AuthenticatorSettings({ onChange }: { onChange?: () => void } = {}) {
+  const { t, isPt } = useTranslation();
   const [view, setView] = useState<View>({ kind: "loading" });
   const [reload, setReload] = useState(0);
   const [notice, setNotice] = useState<string | null>(null);
@@ -310,7 +312,7 @@ export function AuthenticatorSettings({ onChange }: { onChange?: () => void } = 
             className="justify-self-start border-hairline-strong text-danger hover:bg-danger-tint/10 hover:text-danger"
           >
             {busy ? <Spinner aria-hidden /> : null}
-            Turn off authenticator
+            {isPt ? "Desativar autenticador" : "Turn off authenticator"}
           </Button>
         </div>
         <Notice message={notice} />
@@ -321,7 +323,9 @@ export function AuthenticatorSettings({ onChange }: { onChange?: () => void } = 
       <form className="space-y-4" onSubmit={(event) => void begin(event)}>
         <div className="grid gap-3 @md:grid-cols-[minmax(0,16rem)_auto] @md:items-end">
           <Field className="gap-2">
-            <FieldLabel htmlFor="authenticator-password">Current password</FieldLabel>
+            <FieldLabel htmlFor="authenticator-password">
+              {t("accounts.currentPassword", "Current password")}
+            </FieldLabel>
             <Input
               id="authenticator-password"
               type="password"
@@ -333,11 +337,14 @@ export function AuthenticatorSettings({ onChange }: { onChange?: () => void } = 
           </Field>
           <Button type="submit" variant="outline" disabled={busy} className="justify-self-start border-hairline-strong">
             {busy ? <Spinner aria-hidden /> : null}
-            Set up authenticator
+            {t("accounts.setUpAuthenticator", "Set up authenticator")}
           </Button>
         </div>
         <FieldDescription className="text-fg-muted">
-          Confirm your password first. You will need an app such as 1Password, Google Authenticator or Authy.
+          {t(
+            "accounts.confirmPasswordFirst",
+            "Confirm your password first. You will need an app such as 1Password, Google Authenticator or Authy.",
+          )}
         </FieldDescription>
         <Notice message={notice} />
       </form>
@@ -349,10 +356,13 @@ export function AuthenticatorSettings({ onChange }: { onChange?: () => void } = 
       <div className="flex items-start justify-between gap-4 p-5">
         <div className="min-w-0 space-y-1">
           <h3 id="authenticator-heading" className="text-sm font-semibold text-fg">
-            Your authenticator
+            {t("accounts.authenticatorTitle", "Your authenticator")}
           </h3>
           <p className="text-sm text-fg-muted">
-            A 6-digit code from an app on your phone, asked for after your password.
+            {t(
+              "accounts.authenticatorDesc",
+              "A 6-digit code from an app on your phone, asked for after your password.",
+            )}
           </p>
         </div>
         {badge}
