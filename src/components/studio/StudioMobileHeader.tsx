@@ -41,6 +41,7 @@ import { Button } from "@/components/ui/button";
 import { GitHubRepoLink } from "@/components/github-repo-link";
 import { ReadOnlyMarker } from "@/components/read-only-marker";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { LanguageSelector } from "@/components/LanguageSelector";
 import { writeToClipboard } from "@/components/copy-button";
 import { toast } from "sonner";
 
@@ -257,6 +258,8 @@ export const StudioMobileHeader = React.memo(function StudioMobileHeader({
                 <DropdownMenuItem onClick={() => router.push("/settings/authenticator")} className="cursor-pointer">
                   <ShieldCheck strokeWidth={1.5} className="w-3.5 h-3.5 mr-2" /> Sign-in security
                 </DropdownMenuItem>
+                <div className="border-t border-hairline my-1" />
+                <LanguageSelector showText className="w-full px-2 py-1.5 text-sm justify-start" />
                 <div className="border-t border-hairline my-1" />
                 {/*
                  * A button, deliberately NOT a `DropdownMenuItem`: an item is a

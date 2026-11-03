@@ -19,6 +19,7 @@ import {
 import { cancelControlMode } from "@/components/studio/QueryToolbar";
 import { StudioModals } from "@/components/studio/StudioModals";
 import { StudioOverlays } from "@/components/studio/StudioOverlays";
+import { TruncateTableModal } from "@/components/TruncateTableModal";
 import { AgentRail } from "@/components/agent/AgentRail";
 import { DatabaseConnection, type ColumnSchema, SavedQuery } from "@/lib/types";
 import type { DatabaseObject } from "@/lib/db/types";
@@ -619,6 +620,8 @@ export default function Studio() {
   const handleHideDiagram = useCallback(() => setShowDiagram(false), []);
   const [isSaveQueryModalOpen, setIsSaveQueryModalOpen] = useState(false);
   const openSaveQuery = useCallback(() => setIsSaveQueryModalOpen(true), []);
+  const [truncateTarget, setTruncateTarget] = useState<DatabaseObject | null>(null);
+  const closeTruncateModal = useCallback(() => setTruncateTarget(null), []);
   const [savedKey, setSavedKey] = useState(0);
   const [activeMobileTab, setActiveMobileTab] = useState<"database" | "schema" | "editor">("editor");
   // The Schema tab is the phone layout's object tree, so opening it uses the connection as loading the tree does.
@@ -1247,6 +1250,33 @@ export default function Studio() {
    * Maintenance is withheld from a non-admin because the page it opens is the admin one; the
    * other five are the same for every role, exactly as the flat explorer had them.
    */
+  const handleExecuteTruncate = useCallback(
+    async (sql: string) => {
+      if (!truncateTarget) return false;
+      const tableName = truncateTarget.name;
+      try {
+        const ok = await queryExec.executeQuery(sql, undefined, false);
+        if (ok !== false) {
+          toast({
+            title: "Tabela Truncada",
+            description: `A tabela "${tableName}" foi esvaziada com sucesso.`,
+          });
+          conn.loadObjects();
+          return true;
+        }
+        return false;
+      } catch (err: any) {
+        toast({
+          title: "Falha ao truncar tabela",
+          description: err.message || "Erro durante o comando de truncate.",
+          variant: "destructive",
+        });
+        return false;
+      }
+    },
+    [truncateTarget, queryExec.executeQuery, conn.loadObjects, toast],
+  );
+
   const objectActions = useMemo<TreeRowActionHandlers>(
     () => ({
       onGenerateSelect: (object) => handleGenerateSelect(object.path),
@@ -1258,8 +1288,19 @@ export default function Studio() {
       onCreateObject: openCreateTable,
       onViewSource: openSourceTab,
       onRowAction: runRowAction,
+      onTruncateTable: (object) => setTruncateTarget(object),
+      onViewData: (object) => onTableClick(object.path),
     }),
-    [handleGenerateSelect, handleGenerateCount, openSourceTab, runRowAction, isAdmin, openMaintenance, openCreateTable],
+    [
+      handleGenerateSelect,
+      handleGenerateCount,
+      openSourceTab,
+      runRowAction,
+      isAdmin,
+      openMaintenance,
+      openCreateTable,
+      onTableClick,
+    ],
   );
 
   const requestDeleteConnection = useCallback((id: string) => {
@@ -1865,6 +1906,16 @@ export default function Studio() {
         hasResult={!!tabMgr.currentTab.result}
         onOpenAgent={agentEnabled ? openAgentSheet : undefined}
       />
+
+      {truncateTarget && metadata?.capabilities && (
+        <TruncateTableModal
+          object={truncateTarget}
+          capabilities={metadata.capabilities}
+          databaseType={conn.activeConnection?.type}
+          onClose={closeTruncateModal}
+          onExecute={handleExecuteTruncate}
+        />
+      )}
     </div>
   );
 }

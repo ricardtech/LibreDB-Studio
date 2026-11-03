@@ -543,3 +543,42 @@ export function requestAddress(
 export function shouldRefreshSchema(query: string, schemaRefreshPattern: string): boolean {
   return new RegExp(schemaRefreshPattern, "i").test(query);
 }
+
+export interface TruncateOptions {
+  cascade?: boolean;
+}
+
+/**
+ * Statement to truncate / empty all records from an entity/relation table.
+ */
+export function generateTruncateQuery(
+  path: readonly string[],
+  capabilities: ProviderCapabilities,
+  databaseType?: string,
+  options: TruncateOptions = {},
+): string {
+  objectSegment(path);
+  const table = quoteObjectPath(path, capabilities);
+  const term = terminator(capabilities);
+  const type = (databaseType ?? "").toLowerCase();
+
+  // SQLite does not support TRUNCATE TABLE
+  if (type === "sqlite" || type.includes("sqlite")) {
+    return `DELETE FROM ${table}${term}`;
+  }
+
+  // MongoDB collections
+  if (type === "mongodb" || type.includes("mongo")) {
+    const collection = path[path.length - 1];
+    return `db.${collection}.deleteMany({})`;
+  }
+
+  // PostgreSQL / CockroachDB / Redshift
+  if (type === "postgres" || type.includes("postgres") || type.includes("pg")) {
+    return `TRUNCATE TABLE ${table}${options.cascade !== false ? " CASCADE" : ""}${term}`;
+  }
+
+  // Default SQL (MySQL, MariaDB, SQL Server, Oracle, ClickHouse)
+  return `TRUNCATE TABLE ${table}${term}`;
+}
+

@@ -432,27 +432,29 @@ export function StatsBar({
           </Button>
 
           {editingEnabled && pendingChanges && pendingChanges.length > 0 && (
-            <div className="flex items-center gap-1">
-              <span className="text-xs text-warning bg-warning-tint/10 px-1.5 py-0.5 rounded">
-                {pendingChanges.length} change{pendingChanges.length > 1 ? "s" : ""}
+            <div className="flex items-center gap-1.5 bg-warning/10 border border-warning/30 rounded-md px-2 py-0.5">
+              <span className="text-xs font-semibold text-warning">
+                {pendingChanges.length} {pendingChanges.length > 1 ? "alterações" : "alteração"}
               </span>
               <Button
-                variant="ghost"
+                variant="default"
                 size="sm"
-                className="h-6 px-1.5 text-xs text-success hover:bg-success-tint/10"
-                aria-label="Apply changes"
+                className="h-6 px-2 text-xs font-medium bg-success text-white hover:bg-success/90 gap-1"
+                aria-label="Salvar alterações"
                 onClick={onApplyChanges}
               >
-                <Save strokeWidth={1.5} className="w-3 h-3" />
+                <Save strokeWidth={2} className="w-3 h-3" />
+                <span>Salvar</span>
               </Button>
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-6 px-1.5 text-xs text-danger hover:bg-danger-tint/10"
-                aria-label="Discard changes"
+                className="h-6 px-1.5 text-xs text-danger hover:bg-danger/10 gap-0.5"
+                aria-label="Descartar alterações"
                 onClick={onDiscardChanges}
               >
-                <X strokeWidth={1.5} className="w-3 h-3" />
+                <X strokeWidth={2} className="w-3 h-3" />
+                <span className="text-[11px]">Descartar</span>
               </Button>
             </div>
           )}

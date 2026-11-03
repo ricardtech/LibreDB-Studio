@@ -552,7 +552,8 @@ export function useInlineEditing({
   transactionActive = false,
   activeCatalog,
 }: UseInlineEditingParams) {
-  const [editingEnabled, setEditingEnabled] = useState(false);
+  // Enabled by default so users can double-click cells and edit directly (DbGate-style)
+  const [editingEnabled, setEditingEnabled] = useState(true);
   const [pendingChanges, setPendingChanges] = useState<CellChange[]>([]);
   const { toast } = useToast();
 

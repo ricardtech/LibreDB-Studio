@@ -59,6 +59,7 @@
 import {
   ChartColumn,
   Code,
+  Eraser,
   FileCode,
   Funnel,
   Hash,
@@ -66,6 +67,7 @@ import {
   Play,
   Plus,
   Search,
+  Table,
   Trash2,
   WandSparkles,
   Wrench,
@@ -138,6 +140,14 @@ export interface TreeRowActionHandlers {
    * declared action is drawn.
    */
   readonly onRowAction?: (object: DatabaseObject, actionId: string) => void;
+  /**
+   * Truncate/empty all rows in this relation table.
+   */
+  readonly onTruncateTable?: (object: DatabaseObject) => void;
+  /**
+   * Open the table data directly in grid view without typing SQL.
+   */
+  readonly onViewData?: (object: DatabaseObject) => void;
 }
 
 /** One item of a row's menu. `id` is stable and is what a test asserts; `label` is read. */
@@ -198,6 +208,16 @@ function objectActions(
 ): readonly TreeRowAction[] {
   const actions: TreeRowAction[] = [];
   const isRelation = kind.role === "relation";
+
+  const viewData = handlers.onViewData;
+  if (isRelation && viewData !== undefined) {
+    actions.push({
+      id: "view-table-data",
+      label: "Ver Dados da Tabela",
+      icon: Table,
+      run: () => viewData(object),
+    });
+  }
 
   const select = handlers.onGenerateSelect;
   if (isRelation && select !== undefined) {
@@ -281,6 +301,16 @@ function objectActions(
         run: () => maintenance(object),
       });
     }
+  }
+
+  const truncate = handlers.onTruncateTable;
+  if (isRelation && truncate !== undefined && !readOnly) {
+    actions.push({
+      id: "truncate-table",
+      label: "Truncar Tabela",
+      icon: Eraser,
+      run: () => truncate(object),
+    });
   }
 
   /*

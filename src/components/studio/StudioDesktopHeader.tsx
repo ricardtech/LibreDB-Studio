@@ -15,7 +15,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { GitHubRepoLink } from "@/components/github-repo-link";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { LanguageSelector } from "@/components/LanguageSelector";
 import { ReadOnlyMarker } from "@/components/read-only-marker";
+import { useTranslation } from "@/lib/i18n";
 
 /** What the pulse indicator reads for each state. Only Online animates: the others are not live. */
 const PULSE_TEXT: Record<ConnectionPulse, string> = {
@@ -41,6 +43,7 @@ export const StudioDesktopHeader = React.memo(function StudioDesktopHeader({
   onLogout,
 }: StudioDesktopHeaderProps) {
   const router = useRouter();
+  const { t } = useTranslation();
 
   return (
     <header className="hidden md:flex h-14 border-b border-hairline items-center justify-between px-4 bg-surface/80 backdrop-blur-xl sticky top-0 z-30">
@@ -51,7 +54,7 @@ export const StudioDesktopHeader = React.memo(function StudioDesktopHeader({
         <div>
           <div className="flex items-center gap-1.5">
             <h1 className="text-xs font-medium text-fg truncate max-w-[120px]">
-              {activeConnection ? activeConnection.name : "Quick Access"}
+              {activeConnection ? activeConnection.name : t("header.quickAccess", "Quick Access")}
             </h1>
             {activeConnection?.readOnly === true && <ReadOnlyMarker />}
           </div>
@@ -100,7 +103,7 @@ export const StudioDesktopHeader = React.memo(function StudioDesktopHeader({
           className="h-7 px-3 text-xs font-medium gap-2 text-fg-muted hover:text-hue-purple hover:bg-hue-purple-tint/10"
           onClick={() => router.push("/monitoring")}
         >
-          <Gauge strokeWidth={1.5} className="w-3 h-3" /> Monitoring
+          <Gauge strokeWidth={1.5} className="w-3 h-3" /> {t("header.monitoring", "Monitoring")}
         </Button>
 
         {user && (
@@ -113,25 +116,26 @@ export const StudioDesktopHeader = React.memo(function StudioDesktopHeader({
             <DropdownMenuContent align="end" className="w-56 bg-raised border-hairline-strong text-fg-secondary">
               {isAdmin && (
                 <DropdownMenuItem onClick={() => router.push("/admin")} className="cursor-pointer">
-                  <Settings strokeWidth={1.5} className="w-3.5 h-3.5 mr-2" /> Admin Dashboard
+                  <Settings strokeWidth={1.5} className="w-3.5 h-3.5 mr-2" /> {t("header.adminDashboard", "Admin Dashboard")}
                 </DropdownMenuItem>
               )}
               <DropdownMenuItem onClick={() => router.push("/monitoring")} className="cursor-pointer">
-                <Gauge strokeWidth={1.5} className="w-3.5 h-3.5 mr-2" /> Monitoring
+                <Gauge strokeWidth={1.5} className="w-3.5 h-3.5 mr-2" /> {t("header.monitoring", "Monitoring")}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => router.push("/settings/mcp")} className="cursor-pointer">
-                <KeyRound strokeWidth={1.5} className="w-3.5 h-3.5 mr-2" /> MCP
+                <KeyRound strokeWidth={1.5} className="w-3.5 h-3.5 mr-2" /> {t("header.mcp", "MCP")}
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => router.push("/settings/authenticator")} className="cursor-pointer">
-                <ShieldCheck strokeWidth={1.5} className="w-3.5 h-3.5 mr-2" /> Sign-in security
+                <ShieldCheck strokeWidth={1.5} className="w-3.5 h-3.5 mr-2" /> {t("header.security", "Sign-in security")}
               </DropdownMenuItem>
               <div className="border-t border-hairline my-1" />
               <DropdownMenuItem onClick={onLogout} className="text-danger cursor-pointer">
-                <LogOut strokeWidth={1.5} className="w-3.5 h-3.5 mr-2" /> Logout
+                <LogOut strokeWidth={1.5} className="w-3.5 h-3.5 mr-2" /> {t("header.logout", "Logout")}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         )}
+        <LanguageSelector className="mr-1" />
         {/* Renders nothing when a host (platform) owns the theme — see ThemeToggle. */}
         <ThemeToggle className="mr-1" />
         <GitHubRepoLink className="text-fg-tertiary hover:text-fg-bright mr-2" />
