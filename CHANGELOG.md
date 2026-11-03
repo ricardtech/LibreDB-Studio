@@ -6,6 +6,31 @@ O formato é baseado no [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ---
 
+## [2.0.1-ricardtech] - 03/11/2026
+
+### 🐛 Correções de Compatibilidade (ClickHouse)
+- **Compatibilidade Universal com ClickHouse e Aptabase:**
+  - Corrigido o erro fatal `Code: 47. DB::Exception: There's no column 'mv.target_table' in table 'mv'`.
+  - O LibreDB oficial assumia a existência das colunas `target_table` e `target_database` introduzidas no ClickHouse 26+, quebrando qualquer servidor ClickHouse em versão estável anterior (incluindo instâncias Aptabase).
+  - Substituída a subquery rígida pela filtragem estrutural universal `t.name NOT LIKE '.inner_id.%' AND t.name NOT LIKE '.inner.%'`, compatível com 100% das versões do ClickHouse.
+
+### 🌐 Internacionalização Estendida (pt-BR 100%)
+- **Painel Administrativo (`/admin`):**
+  - Tradução completa do cabeçalho, subtítulo e abas de navegação (*Visão Geral, Operações, Monitoramento, Segurança, Contas, Auditoria*).
+  - Tradução dos cartões de métricas (*Todos os Sistemas Operacionais, Total de Consultas, Tamanho dos Bancos, Conexões, Hoje vs ontem, Status dos Servidores*).
+  - Inclusão do alternador de idioma (`LanguageSelector`) diretamente no cabeçalho do Admin Dashboard.
+- **Editor de Consultas & Barra de Ferramentas:**
+  - Botões de ação traduzidos: `EXECUTAR` (`RUN`), `Executar Seleção` (`Run Selected`), `Formatar` (`Format`), `Copiar` / `Copiar Sel`, `Limpar` (`Clear`), `Linhas` (`Lines`), `Explicar` (`Explain`), `EDITAR` (`EDIT`), `SANDBOX` e `IMPORTAR` (`IMPORT`).
+- **Navegador de Objetos e Barra Lateral:**
+  - Rótulo de seção traduzido para `Conexões`.
+  - Placeholder de busca traduzido para `Filtrar objetos carregados...`.
+  - Pastas da árvore traduzidas dinamicamente: `Tabelas`, `Views`, `Views Materializadas`, `Dicionários`, `Funções`, `Procedimentos`, `Gatilhos`, `Índices`.
+- **Painel de Resultados Inferior (`BottomPanel`):**
+  - Abas traduzidas: `Resultados`, `Explicar`, `Histórico`, `Salvos`, `Gráficos`, `Tabela Dinâmica`, `Documentação`, `Diferenças`, `Painel`.
+  - Mensagens de estado vazio: `Execute uma consulta ou veja o histórico` e `Pronto para consultar`.
+
+---
+
 ## [2.0.0-ricardtech] - 03/11/2026
 
 ### 🚀 Novidades e Recursos (Inspirados no DbGate)
@@ -35,3 +60,4 @@ O formato é baseado no [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 ### 🛠️ Ajustes de Identidade e Versionamento
 - Atualizado o manifesto do pacote para `@ricardtech/libredb-studio` versão **`2.0.0-ricardtech`**.
 - Documentação e README traduzidos e adaptados para o ecossistema RicardTech.
+

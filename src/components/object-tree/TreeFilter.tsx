@@ -14,6 +14,7 @@
 import { LoaderCircle, Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { SEARCH_READ_BATCH, type TreeSearch } from "./use-tree-nodes";
+import { useTranslation } from "@/lib/i18n";
 
 export interface TreeFilterProps {
   readonly query: string;
@@ -25,6 +26,7 @@ export interface TreeFilterProps {
 }
 
 export function TreeFilter({ query, onQueryChange, search, onEnterTree }: TreeFilterProps) {
+  const { t } = useTranslation();
   const onKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "Escape" && query !== "") {
       event.preventDefault();
@@ -46,8 +48,8 @@ export function TreeFilter({ query, onQueryChange, search, onEnterTree }: TreeFi
         />
         <Input
           type="search"
-          aria-label="Filter objects"
-          placeholder="Filter loaded objects"
+          aria-label={t("editor.filterLoadedObjects", "Filter loaded objects")}
+          placeholder={t("editor.filterLoadedObjects", "Filter loaded objects")}
           value={query}
           onChange={(event) => onQueryChange(event.target.value)}
           onKeyDown={onKeyDown}

@@ -6,6 +6,7 @@ import type { ProviderMetadata } from "@/hooks/use-provider-metadata";
 import { cn } from "@/lib/utils";
 import { FlaskConical, Pencil, Play, Save, Square, Terminal, Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useTranslation } from "@/lib/i18n";
 
 /**
  * What the editor's Cancel control can do on a connection (#1364).
@@ -127,6 +128,7 @@ export const QueryToolbar = React.memo(function QueryToolbar({
       : null;
   // The group's border and separator are chrome for its members; with no member to
   // show, the whole group goes rather than leaving an empty rule (#427).
+  const { t } = useTranslation();
   const hasGroupControls = transaction !== null || !!onTogglePlayground || !!onToggleEditing || !!onImport;
 
   return (
@@ -144,7 +146,7 @@ export const QueryToolbar = React.memo(function QueryToolbar({
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2 px-2 py-0.5 rounded bg-hue-blue-tint/5 border border-hue-blue-tint/10">
             <Terminal strokeWidth={1.5} className="w-3 h-3 text-hue-blue" />
-            <span className="text-xs font-medium text-hue-blue">Query</span>
+            <span className="text-xs font-medium text-hue-blue">{t("editor.query", "Query")}</span>
           </div>
           {/* The separator is chrome for Save; with Save withheld it would be a rule
               standing alone, the same reason the control group drops its border (#427). */}
@@ -157,7 +159,7 @@ export const QueryToolbar = React.memo(function QueryToolbar({
                 className="h-7 text-xs font-medium text-fg-muted hover:text-fg-bright gap-2"
                 onClick={onSaveQuery}
               >
-                <Save strokeWidth={1.5} className="w-3 h-3" /> Save
+                <Save strokeWidth={1.5} className="w-3 h-3" /> {t("editor.save", "Save")}
               </Button>
             </>
           )}
@@ -172,7 +174,7 @@ export const QueryToolbar = React.memo(function QueryToolbar({
             disabled={!activeConnection}
           >
             <Play strokeWidth={1.5} className="w-3 h-3 fill-current" />
-            RUN
+            {t("editor.runBtn", "RUN")}
           </Button>
         )}
 
@@ -229,7 +231,7 @@ export const QueryToolbar = React.memo(function QueryToolbar({
                 title="Playground mode: queries are auto-rolled back"
               >
                 <FlaskConical strokeWidth={1.5} className="w-3 h-3" />
-                SANDBOX
+                {t("editor.sandbox", "SANDBOX")}
               </Button>
             )}
 
@@ -247,7 +249,7 @@ export const QueryToolbar = React.memo(function QueryToolbar({
                 title="Enable inline data editing"
               >
                 <Pencil strokeWidth={1.5} className="w-3 h-3" />
-                EDIT
+                {t("editor.edit", "EDIT")}
               </Button>
             )}
 
@@ -260,7 +262,7 @@ export const QueryToolbar = React.memo(function QueryToolbar({
                 title="Import data from CSV/JSON"
               >
                 <Upload strokeWidth={1.5} className="w-3 h-3" />
-                IMPORT
+                {t("editor.import", "IMPORT")}
               </Button>
             )}
           </div>

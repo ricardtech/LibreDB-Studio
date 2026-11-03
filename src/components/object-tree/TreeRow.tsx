@@ -28,6 +28,25 @@ import {
 import type { DatabaseObject } from "@/lib/db/types";
 import type { TreeRowModel } from "./flatten";
 import type { TreeReadFailure } from "./use-tree-nodes";
+import { useTranslation } from "@/lib/i18n";
+
+const FOLDER_TRANSLATIONS: Record<string, string> = {
+  Tables: "Tabelas",
+  Views: "Views",
+  "Materialized Views": "Views Materializadas",
+  Dictionaries: "Dicionários",
+  Functions: "Funções",
+  Procedures: "Procedimentos",
+  Triggers: "Gatilhos (Triggers)",
+  Indexes: "Índices",
+  Sequences: "Sequências",
+  Types: "Tipos",
+  Collections: "Coleções",
+  Buckets: "Buckets",
+  Streams: "Streams",
+  Topics: "Tópicos",
+  Containers: "Contêineres",
+};
 
 /** Fixed, because the window is a slice and a slice needs one arithmetic for every row. */
 export const TREE_ROW_HEIGHT = 28;
@@ -215,6 +234,8 @@ export function TreeRow({
   const showsTwisty = row.kind === "object" && row.expanded !== undefined && onToggle !== undefined;
   // The trailing slot draws a sentence, the failure or the refusal, and the name then shares the
   // row's room with it (the slot comment below says how).
+  const { isPt } = useTranslation();
+  const displayLabel = row.kind === "folder" && isPt ? (FOLDER_TRANSLATIONS[row.label] ?? row.label) : row.label;
   const sentenceShown = failure !== undefined || row.unavailable !== undefined;
   return (
     <div
@@ -320,12 +341,12 @@ export function TreeRow({
       >
         {row.match !== undefined ? (
           <>
-            {row.label.slice(0, row.match[0])}
-            <mark className="rounded-sm bg-brand/25 text-inherit">{row.label.slice(row.match[0], row.match[1])}</mark>
-            {row.label.slice(row.match[1])}
+            {displayLabel.slice(0, row.match[0])}
+            <mark className="rounded-sm bg-brand/25 text-inherit">{displayLabel.slice(row.match[0], row.match[1])}</mark>
+            {displayLabel.slice(row.match[1])}
           </>
         ) : (
-          row.label
+          displayLabel
         )}
       </span>
       {isPrimaryColumn && (

@@ -22,6 +22,7 @@ import type { ResultExportFormat } from "@/lib/export/result-export";
 import { resolveExplainPlan } from "@/lib/explain";
 import { hasGraphValues } from "@/lib/db/graph/result-graph";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n";
 import {
   ChartColumn,
   Bookmark,
@@ -397,10 +398,12 @@ export const BottomPanel = React.memo(function BottomPanel({
     else run(entry.format, exportArtifact, entry.csvDelimiter);
   };
 
+  const { t } = useTranslation();
+
   const tabs: { key: BottomPanelMode; label: string; icon: React.ReactNode; activeClass: string }[] = [
     {
       key: "results",
-      label: "Results",
+      label: t("results.resultsTab", "Results"),
       icon: <LayoutGrid strokeWidth={1.5} className="w-3 h-3" />,
       activeClass: "text-hue-blue border-hue-blue-tint bg-fill",
     },
@@ -412,49 +415,49 @@ export const BottomPanel = React.memo(function BottomPanel({
     },
     {
       key: "explain",
-      label: "Explain",
+      label: t("results.explainTab", "Explain"),
       icon: <Zap strokeWidth={1.5} className="w-3 h-3" />,
       activeClass: "text-hue-amber border-hue-amber-tint bg-fill",
     },
     {
       key: "history",
-      label: "History",
+      label: t("results.historyTab", "History"),
       icon: <Clock strokeWidth={1.5} className="w-3 h-3" />,
       activeClass: "text-hue-emerald border-hue-emerald-tint bg-fill",
     },
     {
       key: "saved",
-      label: "Saved",
+      label: t("results.savedTab", "Saved"),
       icon: <Bookmark strokeWidth={1.5} className="w-3 h-3" />,
       activeClass: "text-hue-purple border-hue-purple-tint bg-fill",
     },
     {
       key: "charts",
-      label: "Charts",
+      label: t("results.chartsTab", "Charts"),
       icon: <ChartColumn strokeWidth={1.5} className="w-3 h-3" />,
       activeClass: "text-hue-cyan border-hue-cyan-tint bg-fill",
     },
     {
       key: "pivot",
-      label: "Pivot",
+      label: t("results.pivotTab", "Pivot"),
       icon: <Columns3 strokeWidth={1.5} className="w-3 h-3" />,
       activeClass: "text-hue-orange border-hue-orange-tint bg-fill",
     },
     {
       key: "docs",
-      label: "Docs",
+      label: t("results.docsTab", "Docs"),
       icon: <FileText strokeWidth={1.5} className="w-3 h-3" />,
       activeClass: "text-hue-teal border-hue-teal-tint bg-fill",
     },
     {
       key: "schemadiff",
-      label: "Diff",
+      label: t("results.diffTab", "Diff"),
       icon: <GitCompare strokeWidth={1.5} className="w-3 h-3" />,
       activeClass: "text-hue-rose border-hue-rose-tint bg-fill",
     },
     {
       key: "dashboard",
-      label: "Dashboard",
+      label: t("results.dashboardTab", "Dashboard"),
       icon: <LayoutDashboard strokeWidth={1.5} className="w-3 h-3" />,
       activeClass: "text-hue-indigo border-hue-indigo-tint bg-fill",
     },
@@ -800,8 +803,8 @@ export const BottomPanel = React.memo(function BottomPanel({
             ) : (
               <div className="h-full flex flex-col items-center justify-center opacity-20 bg-surface">
                 <Terminal strokeWidth={1.5} className="w-12 h-12 mb-4" />
-                <p className="text-xs font-medium">Execute a query or check history</p>
-                <p className="text-xs mt-2">Ready to query</p>
+                <p className="text-xs font-medium">{t("results.executeOrCheck", "Execute a query or check history")}</p>
+                <p className="text-xs mt-2">{t("results.readyToQuery", "Ready to query")}</p>
               </div>
             )}
           </React.Suspense>

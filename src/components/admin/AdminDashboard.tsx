@@ -10,6 +10,8 @@ import { LogOut, ArrowLeft, LayoutDashboard, Wrench, Activity, Shield, FileText,
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { ADMIN_SECTIONS, adminSectionFromPathname, adminSectionPath, type AdminSection } from "@/lib/admin-sections";
+import { useTranslation } from "@/lib/i18n";
+import { LanguageSelector } from "@/components/LanguageSelector";
 
 const SECTION_NAV: Record<AdminSection, { label: string; icon: typeof LayoutDashboard }> = {
   overview: { label: "Overview", icon: LayoutDashboard },
@@ -28,6 +30,7 @@ export default function AdminDashboard({ children }: AdminDashboardProps) {
   const router = useRouter();
   const pathname = usePathname();
   const activeSection = adminSectionFromPathname(pathname);
+  const { t } = useTranslation();
 
   const handleLogout = async () => {
     // In server storage mode the browser copy belongs to the signed-in account and is cleared once
@@ -62,10 +65,11 @@ export default function AdminDashboard({ children }: AdminDashboardProps) {
       <header className="border-b border-hairline bg-surface">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 py-3 flex items-center justify-between">
           <div className="space-y-0.5">
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-fg">Admin Dashboard</h1>
-            <p className="text-xs text-fg-muted">Manage your application and infrastructure.</p>
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-fg">{t("admin.dashboard", "Admin Dashboard")}</h1>
+            <p className="text-xs text-fg-muted">{t("admin.subtitle", "Manage your application and infrastructure.")}</p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2">
+            <LanguageSelector />
             <Button
               variant="outline"
               size="sm"
@@ -73,7 +77,7 @@ export default function AdminDashboard({ children }: AdminDashboardProps) {
               onClick={() => router.push("/")}
             >
               <ArrowLeft className="mr-2 h-3.5 w-3.5" />
-              <span className="hidden sm:inline">Editor</span>
+              <span className="hidden sm:inline">{t("admin.editor", "Editor")}</span>
             </Button>
             <Button
               variant="outline"
@@ -82,7 +86,7 @@ export default function AdminDashboard({ children }: AdminDashboardProps) {
               onClick={handleLogout}
             >
               <LogOut className="mr-2 h-3.5 w-3.5" />
-              <span className="hidden sm:inline">Logout</span>
+              <span className="hidden sm:inline">{t("admin.logout", "Logout")}</span>
             </Button>
           </div>
         </div>
@@ -97,6 +101,7 @@ export default function AdminDashboard({ children }: AdminDashboardProps) {
             {ADMIN_SECTIONS.map((section) => {
               const { label, icon: Icon } = SECTION_NAV[section];
               const isActive = activeSection === section;
+              const translatedLabel = t(`admin.${section}`, label);
               return (
                 <Link
                   key={section}
@@ -111,7 +116,7 @@ export default function AdminDashboard({ children }: AdminDashboardProps) {
                   )}
                 >
                   <Icon className="h-4 w-4" strokeWidth={1.5} />
-                  <span className="hidden sm:inline">{label}</span>
+                  <span className="hidden sm:inline">{translatedLabel}</span>
                 </Link>
               );
             })}

@@ -24,6 +24,7 @@ import { logger } from "@/lib/logger";
 import { setLineNumbersPreference, useLineNumbersPreference } from "@/hooks/use-line-numbers-preference";
 import { writeToClipboard } from "@/components/copy-button";
 import { toast } from "sonner";
+import { useTranslation } from "@/lib/i18n";
 import { cursorTarget, selectionTarget } from "@/lib/sql/run-target";
 import { resolveSqlGrammar } from "@/lib/sql/grammar";
 import type { DatabaseType } from "@/lib/types";
@@ -158,6 +159,7 @@ export const QueryEditor = forwardRef<QueryEditorRef, QueryEditorProps>(
     ref,
   ) => {
     const monaco = useMonacoInstance();
+    const { t } = useTranslation();
     const editorRef = useRef<Monaco.editor.IStandaloneCodeEditor | null>(null);
     const [hasSelection, setHasSelection] = useState(false);
 
@@ -627,7 +629,7 @@ export const QueryEditor = forwardRef<QueryEditorRef, QueryEditorProps>(
               className="h-7 text-xs font-medium text-white bg-brand-solid hover:bg-brand-solid-hover hover:text-white gap-2 shadow-[0_0_10px_rgba(37,99,235,0.3)] animate-in fade-in zoom-in duration-200"
               onClick={handleExecute}
             >
-              <Play strokeWidth={1.5} className="w-3 h-3 fill-current" /> Run Selected
+              <Play strokeWidth={1.5} className="w-3 h-3 fill-current" /> {t("editor.runSelected", "Run Selected")}
             </Button>
           )}
 
@@ -639,7 +641,7 @@ export const QueryEditor = forwardRef<QueryEditorRef, QueryEditorProps>(
               onClick={handleFormat}
               title={`Format ${formatTitleNoun(language)} (${shortcutLabel(SHORTCUTS.formatQuery)})`}
             >
-              <TextAlignStart strokeWidth={1.5} className="w-3 h-3" /> Format
+              <TextAlignStart strokeWidth={1.5} className="w-3 h-3" /> {t("editor.format", "Format")}
             </Button>
           )}
 
@@ -649,7 +651,7 @@ export const QueryEditor = forwardRef<QueryEditorRef, QueryEditorProps>(
             className="h-7 text-xs font-medium text-fg-muted hover:text-fg-bright gap-2"
             onClick={handleCopy}
           >
-            <Copy strokeWidth={1.5} className="w-3 h-3" /> {hasSelection ? "Copy Sel" : "Copy"}
+            <Copy strokeWidth={1.5} className="w-3 h-3" /> {hasSelection ? t("editor.copySel", "Copy Sel") : t("editor.copy", "Copy")}
           </Button>
 
           <Button
@@ -658,7 +660,7 @@ export const QueryEditor = forwardRef<QueryEditorRef, QueryEditorProps>(
             className="h-7 text-xs font-medium text-fg-muted hover:text-danger gap-2"
             onClick={handleClear}
           >
-            <Trash2 strokeWidth={1.5} className="w-3 h-3" /> Clear
+            <Trash2 strokeWidth={1.5} className="w-3 h-3" /> {t("editor.clear", "Clear")}
           </Button>
 
           <div className="h-4 w-px bg-fill" />
@@ -673,7 +675,7 @@ export const QueryEditor = forwardRef<QueryEditorRef, QueryEditorProps>(
             onClick={() => setLineNumbersPreference(!showLineNumbers)}
             title={showLineNumbers ? "Hide line numbers" : "Show line numbers"}
           >
-            <Hash strokeWidth={1.5} className="w-3 h-3" /> Lines
+            <Hash strokeWidth={1.5} className="w-3 h-3" /> {t("editor.lines", "Lines")}
           </Button>
 
           <div className="flex-1" />
@@ -689,7 +691,7 @@ export const QueryEditor = forwardRef<QueryEditorRef, QueryEditorProps>(
                 className="h-7 text-xs font-medium text-warning hover:text-warning-bright gap-2"
                 onClick={onExplain}
               >
-                <Zap strokeWidth={1.5} className="w-3 h-3" /> Explain
+                <Zap strokeWidth={1.5} className="w-3 h-3" /> {t("editor.explain", "Explain")}
               </Button>
             )}
             <kbd className="px-1.5 py-0.5 rounded bg-raised border border-hairline text-[0.5625rem] text-fg-subtle font-mono">

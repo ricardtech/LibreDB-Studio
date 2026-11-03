@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { ConnectionItem } from "./ConnectionItem";
 import { GroupNameDialog } from "./GroupNameDialog";
+import { useTranslation } from "@/lib/i18n";
 
 interface ConnectionsListProps {
   connections: DatabaseConnection[];
@@ -77,10 +78,13 @@ function SectionHeader({
   onToggle?: () => void;
   actions?: React.ReactNode;
 }) {
+  const { t } = useTranslation();
+  const displayLabel = label === "Connections" ? t("sidebar.connections", "Connections") : label;
+
   const text = (
     <span className="flex min-w-0 text-xs font-medium text-muted-foreground">
-      <span className="truncate" title={label}>
-        {label}
+      <span className="truncate" title={displayLabel}>
+        {displayLabel}
       </span>
       {count !== undefined && <span className="ml-1.5 shrink-0 font-normal text-muted-foreground/60">{count}</span>}
     </span>

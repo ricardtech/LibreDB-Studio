@@ -3,6 +3,7 @@
 import { appFetch, withBasePath } from "@/lib/config/base-path";
 import { adminSectionPath } from "@/lib/admin-sections";
 import { useEffect, useMemo, useState, useCallback } from "react";
+import { useTranslation } from "@/lib/i18n";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -466,17 +467,16 @@ function HeroStatusBanner({
   const errorCount = fleetHealth.filter((h) => h.status === "error").length;
   const notCheckedCount = fleetHealth.filter((h) => h.status === "not-checked").length;
 
-  // No score means every row was `not-checked`: nothing was asked, so the line claims nothing
-  // either way and carries no success styling.
+  const { t } = useTranslation();
   const unchecked = healthScore === null;
 
   const statusText = unchecked
-    ? "Not checked"
+    ? t("header.notChecked", "Not checked")
     : errorCount > 0
-      ? "Attention Required"
+      ? t("admin.systemIssues", "Attention Required")
       : degradedCount > 0
-        ? "Degraded Performance"
-        : "All Systems Operational";
+        ? t("admin.degradedPerformance", "Degraded Performance")
+        : t("admin.allSystemsOperational", "All Systems Operational");
 
   const statusColor = unchecked
     ? "text-fg-muted"
@@ -536,7 +536,7 @@ function HeroStatusBanner({
               <span className="text-3xl font-bold tabular-nums" style={{ color: gaugeColor }}>
                 {healthScore === null ? "N/A" : `${animatedScore}%`}
               </span>
-              <span className="text-xs text-fg-muted uppercase tracking-wider">Health</span>
+              <span className="text-xs text-fg-muted uppercase tracking-wider">{t("admin.health", "Health")}</span>
             </div>
             {/* LIVE badge — in the padding below the ring, clear of the stroke. */}
             <div className="absolute bottom-0 left-1/2 -translate-x-1/2 flex items-center gap-1.5">
@@ -545,7 +545,7 @@ function HeroStatusBanner({
                 animate={{ scale: [1, 1.05, 1], opacity: [0.7, 1, 0.7] }}
                 transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
               />
-              <span className="text-[0.625rem] font-bold text-success uppercase tracking-widest">Live</span>
+              <span className="text-[0.625rem] font-bold text-success uppercase tracking-widest">{t("admin.live", "Live")}</span>
             </div>
           </div>
 
@@ -558,22 +558,22 @@ function HeroStatusBanner({
                 <div className="flex gap-1.5 text-xs">
                   {healthyCount > 0 && (
                     <Badge variant="outline" className="border-success-tint/30 text-success h-5 text-[0.625rem]">
-                      {healthyCount} healthy
+                      {healthyCount} {t("admin.healthy", "healthy")}
                     </Badge>
                   )}
                   {degradedCount > 0 && (
                     <Badge variant="outline" className="border-warning-tint/30 text-warning h-5 text-[0.625rem]">
-                      {degradedCount} degraded
+                      {degradedCount} {t("admin.degraded", "degraded")}
                     </Badge>
                   )}
                   {errorCount > 0 && (
                     <Badge variant="outline" className="border-danger-tint/30 text-danger h-5 text-[0.625rem]">
-                      {errorCount} error{errorCount === 1 ? "" : "s"}
+                      {errorCount} {t("admin.errors", "errors")}
                     </Badge>
                   )}
                   {notCheckedCount > 0 && (
                     <Badge variant="outline" className="border-hairline-strong text-fg-muted h-5 text-[0.625rem]">
-                      {notCheckedCount} not checked
+                      {notCheckedCount} {t("admin.notChecked", "not checked")}
                     </Badge>
                   )}
                 </div>
@@ -592,17 +592,17 @@ function HeroStatusBanner({
                   disabled={fleetLoading}
                 >
                   <RefreshCw className={`w-3 h-3 mr-1 ${fleetLoading ? "animate-spin" : ""}`} />
-                  Refresh
+                  {t("admin.refresh", "Refresh")}
                 </Button>
               </div>
             </div>
 
             {/* Counter Cards */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              <CounterCard icon={Link2} label="Connections" value={animatedConns} suffix="" color="text-hue-blue" />
+              <CounterCard icon={Link2} label={t("admin.connections", "Connections")} value={animatedConns} suffix="" color="text-hue-blue" />
               <CounterCard
                 icon={Zap}
-                label="Total Queries"
+                label={t("admin.totalQueries", "Total Queries")}
                 value={animatedQueries}
                 suffix=""
                 color="text-hue-purple"
@@ -610,7 +610,7 @@ function HeroStatusBanner({
               />
               <CounterCard
                 icon={HardDrive}
-                label="DB Size"
+                label={t("admin.dbSize", "DB Size")}
                 value={totalDBSize}
                 suffix={dbSizeExcluded > 0 ? `(${dbSizeExcluded} excluded)` : ""}
                 color="text-hue-emerald"
@@ -618,11 +618,12 @@ function HeroStatusBanner({
               />
               <CounterCard
                 icon={Activity}
-                label="Today"
+                label={t("admin.today", "Today")}
                 value={animatedToday}
                 suffix=""
                 color="text-hue-amber"
                 trend={queryTrend}
+                trendSuffix={t("admin.vsYesterday", "vs yesterday")}
               />
             </div>
           </div>
@@ -639,6 +640,7 @@ function CounterCard({
   suffix,
   color,
   trend,
+  trendSuffix,
   isString,
   formatValue,
 }: {
@@ -648,6 +650,7 @@ function CounterCard({
   suffix: string;
   color: string;
   trend?: number;
+  trendSuffix?: string;
   isString?: boolean;
   formatValue?: (n: number) => string;
 }) {
@@ -668,7 +671,7 @@ function CounterCard({
           {trend > 0 ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
           <span>
             {trend > 0 ? "+" : ""}
-            {trend} vs yesterday
+            {trend} {trendSuffix || "vs yesterday"}
           </span>
         </div>
       )}
@@ -687,6 +690,7 @@ function FleetHealthSection({
   fleetLoading: boolean;
   connections: DatabaseConnection[];
 }) {
+  const { t } = useTranslation();
   if (connections.length === 0) return null;
 
   const getStatusColor = (status: string) => {
@@ -730,9 +734,9 @@ function FleetHealthSection({
     <motion.div variants={itemVariants}>
       <div className="flex items-center gap-2 mb-3">
         <Radio className="h-4 w-4 text-brand" />
-        <h2 className="text-sm font-bold text-fg-secondary">Fleet Status</h2>
+        <h2 className="text-sm font-bold text-fg-secondary">{t("admin.fleetStatus", "Fleet Status")}</h2>
         <span className="text-xs text-fg-subtle">
-          {fleetHealth.length} endpoint{fleetHealth.length !== 1 ? "s" : ""}
+          {fleetHealth.length} {t("admin.endpoints", "endpoints")}
         </span>
       </div>
 

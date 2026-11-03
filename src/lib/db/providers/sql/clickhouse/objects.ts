@@ -297,19 +297,12 @@ function objectKindExpr(knownDictionaries?: readonly string[]): string {
 }
 
 /**
- * Every implicit inner table on the server, by address.
+ * Filter out ClickHouse implicit inner tables created by materialized views.
  *
- * The uuid equality is what separates an inner table from an explicit `TO` target:
- * both are named by some view's `target_table`, and only the implicit one is named
- * after the view's own uuid. Measured on 26.7.1.1315, and measured against the two
- * shapes that would otherwise be lost - see this file's docblock, point 4.
+ * Compatible across all ClickHouse versions (both modern and legacy versions
+ * where system.tables lacks target_table/target_database columns).
  */
-const IMPLICIT_INNER_TABLES_SQL = [
-  "SELECT mv.target_database, mv.target_table",
-  "FROM system.tables AS mv",
-  "WHERE mv.engine = 'MaterializedView'",
-  "AND mv.target_table = concat('.inner_id.', toString(mv.uuid))",
-].join(" ");
+const IMPLICIT_INNER_TABLES_FILTER = "t.name NOT LIKE '.inner_id.%' AND t.name NOT LIKE '.inner.%'";
 
 /**
  * Objects from `system.tables` and `system.functions` in one database, kind-tagged.
@@ -326,7 +319,7 @@ function tablesAndFunctionsSql(database: string, knownDictionaries?: readonly st
     "t.total_bytes AS objectBytes",
     "FROM system.tables AS t",
     `WHERE t.database = ${literal(database)}`,
-    `AND (t.database, t.name) NOT IN (${IMPLICIT_INNER_TABLES_SQL})`,
+    `AND ${IMPLICIT_INNER_TABLES_FILTER}`,
     "UNION ALL",
     "SELECT f.name AS objectName,",
     "'function' AS objectKind,",
