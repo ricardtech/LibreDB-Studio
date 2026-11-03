@@ -11,6 +11,7 @@
  */
 import { getBasePath } from "@/lib/config/base-path";
 import { logger } from "@/lib/logger";
+import { isEmbedAllowed } from "@/lib/security/config";
 
 /** The session cookie's base name. */
 export const SESSION_COOKIE = "auth-token";
@@ -137,10 +138,36 @@ export function cookieScope(baseName: string, plainPath: string, secure: boolean
   return { name: `${HOST_COOKIE_PREFIX}${baseName}${basePathSuffix()}`, path: "/", secure: true };
 }
 
+export type CookieSameSite = "lax" | "strict" | "none";
+
+/**
+ * The SameSite setting for Studio session cookies.
+ * In cross-site iframe environments (e.g. Ricard Hub), browsers discard cookies with SameSite=Lax.
+ * When embedding is enabled and cookies are Secure, "none" is used with the Partitioned attribute (CHIPS)
+ * so the session remains stable across page navigations, tab switches and refreshes.
+ */
+export function readCookieSameSite(secure: boolean): CookieSameSite {
+  const raw = process.env.AUTH_COOKIE_SAME_SITE?.trim().toLowerCase();
+  if (raw === "none" || raw === "lax" || raw === "strict") {
+    if (raw === "none" && !secure) {
+      warnOnce('AUTH_COOKIE_SAME_SITE=none requires a Secure cookie; falling back to "lax" for plain HTTP');
+      return "lax";
+    }
+    return raw;
+  }
+  if (secure && isEmbedAllowed()) {
+    return "none";
+  }
+  return "lax";
+}
+
 /**
  * The delete of a scoped cookie. Next's delete writes Secure only when it is passed, and a browser ignores a delete of
  * a `__Host-` cookie that lacks it, so Secure mode passes it; plain mode is the name and path alone.
  */
-export function cookieDeletion(scope: CookieScope): { name: string; path: string; secure?: true } {
-  return scope.secure ? { name: scope.name, path: scope.path, secure: true } : { name: scope.name, path: scope.path };
+export function cookieDeletion(scope: CookieScope): { name: string; path: string; secure?: true; partitioned?: true } {
+  const partitioned = scope.secure && readCookieSameSite(scope.secure) === "none";
+  return scope.secure
+    ? { name: scope.name, path: scope.path, secure: true, ...(partitioned ? { partitioned: true } : {}) }
+    : { name: scope.name, path: scope.path };
 }

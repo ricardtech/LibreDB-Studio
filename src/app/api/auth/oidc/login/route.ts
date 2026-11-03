@@ -2,7 +2,7 @@ import { getBasePath, withBasePath } from "@/lib/config/base-path";
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { getOIDCConfig, discoverProvider, generateAuthUrl, encryptState, getPublicOrigin } from "@/lib/oidc";
-import { OIDC_STATE_COOKIE, cookieDeletion } from "@/lib/auth-cookies";
+import { OIDC_STATE_COOKIE, cookieDeletion, readCookieSameSite } from "@/lib/auth-cookies";
 import { studioCookie } from "@/lib/studio-cookie";
 import { logger } from "@/lib/logger";
 import { clientAddress } from "@/lib/api/client-address";
@@ -67,10 +67,13 @@ export async function GET(request: Request) {
     const returnTo = safeReturnPath(new URL(request.url).searchParams.get(RETURN_PATH_PARAM));
     const stateCookie = await encryptState(returnTo === null ? state : { ...state, return_to: returnTo });
     const stateScope = await studioCookie(OIDC_STATE_COOKIE, getBasePath() || "/");
+    const sameSite = readCookieSameSite(stateScope.secure);
+    const partitioned = stateScope.secure && sameSite === "none";
     cookieStore.set(stateScope.name, stateCookie, {
       httpOnly: true,
       secure: stateScope.secure,
-      sameSite: "lax",
+      sameSite,
+      ...(partitioned ? { partitioned: true } : {}),
       maxAge: 300, // 5 minutes
       path: stateScope.path,
     });

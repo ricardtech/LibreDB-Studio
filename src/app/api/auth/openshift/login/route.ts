@@ -12,7 +12,7 @@ import { cookies } from "next/headers";
 import type { NextResponse } from "next/server";
 import { RETURN_PATH_PARAM, safeReturnPath } from "@/lib/api/session-ended";
 import { clientAddress } from "@/lib/api/client-address";
-import { cookieDeletion } from "@/lib/auth-cookies";
+import { cookieDeletion, readCookieSameSite } from "@/lib/auth-cookies";
 import { studioCookie } from "@/lib/studio-cookie";
 import { AuthConfigError } from "@/lib/auth-errors";
 import { getBasePath } from "@/lib/config/base-path";
@@ -74,10 +74,13 @@ export async function GET(request: Request): Promise<NextResponse> {
     const returnTo = safeReturnPath(new URL(request.url).searchParams.get(RETURN_PATH_PARAM));
     const { url, state } = await openShiftAuthorizationUrl(reading.metadata, returnTo);
     const stateScope = await studioCookie(OPENSHIFT_STATE_COOKIE, openShiftStateCookiePath());
+    const sameSite = readCookieSameSite(stateScope.secure);
+    const partitioned = stateScope.secure && sameSite === "none";
     cookieStore.set(stateScope.name, await encryptOpenShiftState(state), {
       httpOnly: true,
       secure: stateScope.secure,
-      sameSite: "lax",
+      sameSite,
+      ...(partitioned ? { partitioned: true } : {}),
       maxAge: STATE_MAX_AGE_SECONDS,
       path: stateScope.path,
     });

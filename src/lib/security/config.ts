@@ -84,7 +84,32 @@ export function readTrustProxyHeaders(): boolean {
   return readFlag("TRUST_PROXY_HEADERS", process.env.TRUST_PROXY_HEADERS, hint) ?? true;
 }
 
+/**
+ * Whether embedding in frames/iframes (such as Ricard Hub or dashboards) is allowed.
+ * Controlled via ALLOW_EMBED=true, ALLOW_IFRAME_EMBED=true, or by providing FRAME_ANCESTORS.
+ */
+export function isEmbedAllowed(): boolean {
+  const allowEmbed = readFlag("ALLOW_EMBED", process.env.ALLOW_EMBED, 'use "true" to allow embedding');
+  const allowIframe = readFlag("ALLOW_IFRAME_EMBED", process.env.ALLOW_IFRAME_EMBED, 'use "true" to allow embedding');
+  if (allowEmbed !== undefined) return allowEmbed;
+  if (allowIframe !== undefined) return allowIframe;
+  if (process.env.FRAME_ANCESTORS?.trim()) return true;
+  return false;
+}
+
+/** Sources permitted in the CSP frame-ancestors directive. */
+export function readFrameAncestors(): string[] | undefined {
+  const raw = process.env.FRAME_ANCESTORS?.trim();
+  if (raw) {
+    return raw.split(/\s+/).filter(Boolean);
+  }
+  return isEmbedAllowed() ? ["'self'", "*"] : undefined;
+}
+
 export function readSecurityHeaderOptions(): SecurityHeaderOptions {
+  const frameAncestors = readFrameAncestors();
+  const extra = frameAncestors ? { "frame-ancestors": frameAncestors } : undefined;
+
   return {
     reportOnly: readCspReportOnly(),
     monacoVsPath: process.env.NEXT_PUBLIC_MONACO_VS_PATH,
@@ -99,6 +124,7 @@ export function readSecurityHeaderOptions(): SecurityHeaderOptions {
     hsts: { maxAgeSeconds: HSTS_MAX_AGE_SECONDS, includeSubDomains: readHstsIncludeSubDomains() },
     // passkey config.ts is a pure reader, so the proxy can decide this without opening storage.
     allowWebAuthnGet: passkeyAvailability().state === "ready",
+    ...(extra ? { extra } : {}),
   };
 }
 
@@ -109,6 +135,10 @@ export function readSecurityHeaderOptions(): SecurityHeaderOptions {
 export function withSecurityHeaders(response: NextResponse): NextResponse {
   for (const [name, value] of Object.entries(securityHeaders(readSecurityHeaderOptions()))) {
     response.headers.set(name, value);
+  }
+  if (isEmbedAllowed()) {
+    response.headers.delete("X-Frame-Options");
+    response.headers.delete("x-frame-options");
   }
   return response;
 }

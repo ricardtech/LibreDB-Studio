@@ -17,7 +17,7 @@ import { AuthConfigError } from "@/lib/auth-errors";
 import { storedAccountAllows } from "@/lib/local-accounts";
 import { authenticateBearer } from "@/lib/oidc-bearer";
 import { openShiftRecordCheck } from "@/lib/openshift-auth/session";
-import { type CookieScope, SESSION_COOKIE, cookieDeletion, cookieScope } from "@/lib/auth-cookies";
+import { type CookieScope, SESSION_COOKIE, cookieDeletion, cookieScope, readCookieSameSite } from "@/lib/auth-cookies";
 import { studioCookie } from "@/lib/studio-cookie";
 
 export { isLoopbackHost, readCookieSecureOverride, resetCookieSecurityWarning } from "@/lib/auth-cookies";
@@ -230,10 +230,13 @@ async function settleRecordCheck(
     return true;
   }
   if (check.marker !== null) {
+    const sameSite = readCookieSameSite(marker.secure);
+    const partitioned = marker.secure && sameSite === "none";
     cookieStore.set(marker.name, check.marker, {
       httpOnly: true,
       secure: marker.secure,
-      sameSite: "lax",
+      sameSite,
+      ...(partitioned ? { partitioned: true } : {}),
       maxAge: ACCESS_REVIEW_RETRY_MAX_AGE_SECONDS,
       path: marker.path,
     });
@@ -296,14 +299,13 @@ export async function login(
   );
   const cookieStore = await cookies();
   const scope = await sessionCookie();
+  const sameSite = readCookieSameSite(scope.secure);
+  const partitioned = scope.secure && sameSite === "none";
   cookieStore.set(scope.name, token, {
     httpOnly: true,
     secure: scope.secure,
-    // Must stay "lax" and must NOT be tightened to "strict": the OIDC callback depends on lax's
-    // top-level-GET exception to return the oidc-state cookie. The cases lax does not cover -
-    // notably a cross-site POST /api/auth/login, where there is no pre-existing cookie to withhold
-    // - are covered by the Origin check in src/proxy.ts (src/lib/api/origin-check.ts).
-    sameSite: "lax",
+    sameSite,
+    ...(partitioned ? { partitioned: true } : {}),
     maxAge: lifetime,
     path: scope.path,
   });

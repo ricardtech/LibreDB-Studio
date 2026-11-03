@@ -142,6 +142,7 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
+ENV ALLOW_IFRAME_EMBED=true
 
 # Memory optimization for low-memory environments (Render free tier)
 # V8 heap limit to prevent OOM on 512MB instances

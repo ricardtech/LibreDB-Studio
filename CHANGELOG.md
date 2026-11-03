@@ -6,6 +6,20 @@ O formato é baseado no [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ---
 
+## [2.0.3-ricardtech] - 03/11/2026
+
+### 🛡️ Integração com Ricard Hub e Dashboards (Suporte a Iframe & Cookies Particionados)
+- **Eliminação da Tela Branca em Iframes:**
+  - Adicionado suporte nativo e configurável para incorporação em iframes via `ALLOW_IFRAME_EMBED=true` (ativado por padrão na imagem Docker) e diretiva CSP `FRAME_ANCESTORS` (padrão `'self' *`).
+  - Remoção automática do cabeçalho restritivo `X-Frame-Options: DENY` quando a incorporação estiver habilitada, permitindo que o Ricard Hub e outros hubs/dashboards incorporem o estúdio perfeitamente.
+- **Sessão Persistente sem Desconexão (CHIPS / Cookies Particionados):**
+  - Implementado suporte a cookies `SameSite=None; Secure; Partitioned` para o cookie de sessão `auth-token`.
+  - Navegadores modernos e WebViews (incluindo o Ricard Hub - Desktop) agora mantêm a sessão autenticada de forma persistente, evitando que o usuário seja desconectado ou precise refazer login ao alternar abas, recarregar a página ou navegar entre tabelas.
+- **Integração de Origens no Check CSRF:**
+  - Domínios informados em `FRAME_ANCESTORS` são automaticamente incluídos nos hosts aceitos para requisições com alteração de estado.
+
+---
+
 ## [2.0.2-ricardtech] - 03/11/2026
 
 ### 🌐 Internacionalização Completa (100% pt-BR)

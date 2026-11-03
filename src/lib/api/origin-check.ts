@@ -97,14 +97,15 @@ export function resetOriginCheckWarnings(): void {
  * nothing".
  */
 function configuredHosts(): string[] {
-  const raw = process.env.ALLOWED_ORIGINS;
-  if (!raw) return [];
+  const rawList = [process.env.ALLOWED_ORIGINS, process.env.FRAME_ANCESTORS].filter(Boolean).join(",");
+  if (!rawList) return [];
   const hosts: string[] = [];
-  for (const entry of raw.split(",")) {
+  for (const entry of rawList.split(/[\s,]+/)) {
+    if (entry === "'self'" || entry === "'none'") continue;
     const host = hostOf(entry);
     if (!host) continue;
     if (host === "*") {
-      if (!warnedAboutWildcardOrigin) {
+      if (process.env.ALLOWED_ORIGINS?.includes("*") && !warnedAboutWildcardOrigin) {
         warnedAboutWildcardOrigin = true;
         logger.warn(
           'ALLOWED_ORIGINS contains "*", which is ignored: this is a host allowlist compared exactly, ' +
@@ -114,7 +115,9 @@ function configuredHosts(): string[] {
       }
       continue;
     }
-    hosts.push(host);
+    if (!hosts.includes(host)) {
+      hosts.push(host);
+    }
   }
   return hosts;
 }

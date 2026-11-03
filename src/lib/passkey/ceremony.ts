@@ -12,7 +12,7 @@
 import { createHash, randomBytes } from "node:crypto";
 import { jwtVerify, SignJWT } from "jose";
 import { cookies } from "next/headers";
-import { cookieDeletion } from "@/lib/auth-cookies";
+import { cookieDeletion, readCookieSameSite } from "@/lib/auth-cookies";
 import { derivedSigningKey } from "@/lib/config/auth-env";
 import { getBasePath } from "@/lib/config/base-path";
 import { studioCookie } from "@/lib/studio-cookie";
@@ -91,10 +91,13 @@ async function open(
     .setExpirationTime(exp)
     .sign(await derivedSigningKey(CEREMONY_LABEL));
   const scope = await studioCookie(cookieName, cookiePath());
+  const sameSite = readCookieSameSite(scope.secure);
+  const partitioned = scope.secure && sameSite === "none";
   (await cookies()).set(scope.name, token, {
     httpOnly: true,
     secure: scope.secure,
-    sameSite: "strict",
+    sameSite: sameSite === "none" ? "none" : "strict",
+    ...(partitioned ? { partitioned: true } : {}),
     path: scope.path,
     maxAge: PASSKEY_CEREMONY_TTL_SECONDS,
   });

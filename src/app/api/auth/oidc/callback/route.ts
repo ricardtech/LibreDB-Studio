@@ -3,7 +3,7 @@ import { safeReturnPath } from "@/lib/api/session-ended";
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { login } from "@/lib/auth";
-import { OIDC_STATE_COOKIE, cookieDeletion } from "@/lib/auth-cookies";
+import { OIDC_STATE_COOKIE, cookieDeletion, readCookieSameSite } from "@/lib/auth-cookies";
 import { studioCookie } from "@/lib/studio-cookie";
 import { sessionTtlSeconds } from "@/lib/config/auth-env";
 import {
@@ -210,10 +210,13 @@ export async function GET(request: Request) {
     if (readOidcLogoutHint()) {
       const hint = await studioCookie(OIDC_LOGOUT_HINT_COOKIE, oidcLogoutHintCookiePath());
       if (fitsLogoutHintCookie(idToken, hint.name)) {
+        const sameSite = readCookieSameSite(hint.secure);
+        const partitioned = hint.secure && sameSite === "none";
         cookieStore.set(hint.name, idToken, {
           httpOnly: true,
           secure: hint.secure,
-          sameSite: "lax",
+          sameSite,
+          ...(partitioned ? { partitioned: true } : {}),
           maxAge: sessionTtlSeconds(),
           path: hint.path,
         });
