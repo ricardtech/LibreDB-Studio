@@ -21,10 +21,10 @@ const DICTIONARIES: Record<Language, any> = {
 };
 
 const I18nContext = createContext<I18nContextType>({
-  language: "pt-BR",
+  language: "en",
   setLanguage: () => {},
   t: (key: string, fallback?: string) => fallback ?? key,
-  isPt: true,
+  isPt: false,
 });
 
 function getInitialLanguage(): Language {

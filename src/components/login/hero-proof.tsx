@@ -2,6 +2,7 @@ import { AGENT_EXECUTION_ENGINES } from "@/lib/agent/engine-support";
 import { EXTERNAL_DATABASE_TYPES } from "@/lib/db/compatibility";
 import { LIVE_CHANNELS, LIVE_PLATFORMS } from "@/lib/distribution/channels.generated";
 import { DEPLOY_GROUP_LABELS, DEPLOY_GROUP_ORDER } from "@/lib/distribution/deploy-groups";
+import { useTranslation } from "@/lib/i18n";
 
 /**
  * The two agent modes, in the order a user meets them.
@@ -86,7 +87,34 @@ const OS_PLATFORM_LABELS: Record<string, string> = { linux: "Linux", macos: "mac
 const OS_PLATFORMS = LIVE_PLATFORMS.filter((platform) => platform in OS_PLATFORM_LABELS);
 
 export function HeroProof() {
+  const { isPt } = useTranslation();
   const claims = HERO_CLAIMS;
+
+  const localizedUnit = (claim: (typeof HERO_CLAIMS)[number]) => {
+    if (!isPt) return claim.unit;
+    switch (claim.key) {
+      case "engines":
+        return "motores de banco";
+      case "channels":
+        return "canais de instalação";
+      case "agent":
+        return "modos de agente";
+      default:
+        return claim.unit;
+    }
+  };
+
+  const localizedDetail = (claim: (typeof HERO_CLAIMS)[number]) => {
+    if (!isPt) return claim.detail;
+    switch (claim.key) {
+      case "engines":
+        return "um cliente, um espaço de trabalho, todos eles";
+      case "agent":
+        return `modo plano: elabora consultas · modo agente: somente leitura em ${AGENT_EXECUTION_ENGINES.length} motores`;
+      default:
+        return claim.detail;
+    }
+  };
 
   return (
     // `space-y-1`, and no wider: the agent claim's detail names every engine agent mode
@@ -101,7 +129,7 @@ export function HeroProof() {
               <span className="text-2xl xl:text-3xl font-semibold text-white tabular-nums tracking-tight">
                 {claim.value}
               </span>
-              <span className="text-xs text-fg-tertiary">{claim.unit}</span>
+              <span className="text-xs text-fg-tertiary">{localizedUnit(claim)}</span>
             </dt>
             <dd
               // `leading-snug`, not `leading-normal`: at 1280x800 the agent detail wraps to
@@ -111,14 +139,15 @@ export function HeroProof() {
               className="text-xs text-fg-tertiary leading-snug"
               data-testid={claim.key === "agent" ? "agent-claim" : undefined}
             >
-              {claim.detail}
+              {localizedDetail(claim)}
             </dd>
           </div>
         ))}
       </dl>
 
       <p data-testid="platform-line" className="text-xs text-fg-tertiary select-none">
-        Runs on {OS_PLATFORMS.map((platform) => OS_PLATFORM_LABELS[platform]).join(" · ")}
+        {isPt ? "Roda em " : "Runs on "}
+        {OS_PLATFORMS.map((platform) => OS_PLATFORM_LABELS[platform]).join(" · ")}
       </p>
     </div>
   );

@@ -32,7 +32,8 @@ import {
   useState,
   type Ref,
 } from "react";
-import { CircleAlert, Database, LoaderCircle, SearchX } from "lucide-react";
+import { CircleAlert, Database, FolderTree, LoaderCircle, SearchX } from "lucide-react";
+import { cn } from "@/lib/utils";
 import type { DatabaseObject, ProviderCapabilities, ProviderLabels } from "@/lib/db/types";
 import type { DatabaseConnection } from "@/lib/types";
 import { containerRowId, type TreeRowModel } from "./flatten";
@@ -607,24 +608,35 @@ export function ObjectTree({
   */
   if (deferred === true) {
     return (
-      <TreePanel testId="tree-deferred" icon={<Database strokeWidth={1.5} className="w-6 h-6 text-brand" />}>
-        <h3 className="text-foreground text-xs font-medium mb-1">{connection.name}</h3>
-        <p className="text-xs text-muted-foreground leading-relaxed">
+      <TreePanel
+        testId="tree-deferred"
+        icon={<Database strokeWidth={1.5} className="w-5 h-5 text-brand" />}
+        onClick={onLoad}
+        className="rounded-xl border border-dashed border-border/80 bg-muted/20 hover:bg-muted/40 hover:border-brand/50 transition-all p-4 group"
+      >
+        <h3 className="text-foreground text-xs font-semibold mb-1 group-hover:text-brand transition-colors">
+          {connection.name}
+        </h3>
+        <p className="text-[11px] text-muted-foreground leading-relaxed mb-3">
           {deferredForBilledCompute === true
             ? BILLED_COMPUTE_HOLD
             : t(
                 "tree.deferredNotice",
-                "This connection opens without reading its catalog. The editor is ready to use.",
+                "Esta conexão abre sem ler o catálogo de objetos. Clique aqui para carregar as tabelas e objetos.",
               )}
         </p>
         {onLoad !== undefined && (
           <button
             type="button"
             data-testid="tree-load"
-            onClick={onLoad}
-            className="mt-3 rounded-md bg-brand-solid hover:bg-brand-solid-hover text-white px-3 py-1.5 text-xs font-medium transition-colors"
+            onClick={(e) => {
+              e.stopPropagation();
+              onLoad();
+            }}
+            className="rounded-md bg-brand-solid hover:bg-brand-solid-hover text-white px-3.5 py-1.5 text-xs font-medium transition-all shadow-sm flex items-center gap-1.5 mx-auto"
           >
-            {t("tree.loadObjects", "Load objects")}
+            <FolderTree strokeWidth={1.5} className="w-3.5 h-3.5" />
+            {t("tree.loadObjects", "Carregar objetos")}
           </button>
         )}
       </TreePanel>
@@ -865,14 +877,26 @@ function TreePanel({
   testId,
   icon,
   children,
+  onClick,
+  className,
 }: {
   readonly testId: string;
   readonly icon: React.ReactNode;
   readonly children: React.ReactNode;
+  readonly onClick?: () => void;
+  readonly className?: string;
 }) {
   return (
-    <div data-testid={testId} className="flex flex-col items-center justify-center py-12 px-6 text-center">
-      <div className="w-12 h-12 rounded-full bg-muted flex items-center justify-center mb-4 border border-border">
+    <div
+      data-testid={testId}
+      onClick={onClick}
+      className={cn(
+        "flex flex-col items-center justify-center py-6 px-4 text-center w-full",
+        onClick && "cursor-pointer select-none",
+        className,
+      )}
+    >
+      <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center mb-3 border border-border group-hover:border-brand/40 group-hover:scale-105 transition-all">
         {icon}
       </div>
       {children}

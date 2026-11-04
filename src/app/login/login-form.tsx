@@ -20,6 +20,7 @@ import { OPENSHIFT_LOGIN_PATH } from "@/lib/openshift-auth/config";
 import type { PasskeySignInOffer } from "@/lib/passkey/api-types";
 import { passkeysUsableHere, signInWithPasskey } from "@/lib/passkey/client";
 import { RETURN_PATH_PARAM, safeReturnPath } from "@/lib/api/session-ended";
+import { useTranslation } from "@/lib/i18n";
 
 /**
  * The agent half of the mobile summary. Pulled from `HERO_CLAIMS` rather than retyped, so
@@ -103,6 +104,7 @@ interface LoginFormProps {
  * the form the client had drawn, two `input#email` (Functional Smoke, run 37022597426).
  */
 export default function LoginForm({ authProvider, passkey }: LoginFormProps) {
+  const { isPt } = useTranslation();
   const isOIDC = authProvider === "oidc";
   const isOpenShift = authProvider === "openshift";
   const [email, setEmail] = useState("");
@@ -149,12 +151,12 @@ export default function LoginForm({ authProvider, passkey }: LoginFormProps) {
     if (e) e.preventDefault();
 
     if (!email || !password) {
-      toast.error("Please enter email and password");
+      toast.error(isPt ? "Por favor, digite o email e a senha" : "Please enter email and password");
       return;
     }
 
     if (mfaRequired && !totp) {
-      toast.error("Please enter your authentication code");
+      toast.error(isPt ? "Por favor, digite seu código de autenticação" : "Please enter your authentication code");
       return;
     }
 
@@ -171,7 +173,7 @@ export default function LoginForm({ authProvider, passkey }: LoginFormProps) {
       const data = await response.json();
 
       if (data.success) {
-        toast.success(`Welcome back, ${data.role}!`);
+        toast.success(isPt ? `Bem-vindo de volta, ${data.role}!` : `Welcome back, ${data.role}!`);
         router.push(landingFor(data.role));
         router.refresh();
       } else if (data.mfaRequired) {
@@ -188,10 +190,10 @@ export default function LoginForm({ authProvider, passkey }: LoginFormProps) {
         // (createErrorResponse) both carry `error`, not `message`. Without this fallback, a
         // reverse-proxy Host rewrite or a rate-limited legitimate user both see "Invalid email or
         // password" instead of the actionable text naming ALLOWED_ORIGINS or the retry window.
-        toast.error(data.message || data.error || "Invalid email or password");
+        toast.error(data.message || data.error || (isPt ? "Email ou senha inválidos" : "Invalid email or password"));
       }
     } catch {
-      toast.error("An error occurred. Please try again.");
+      toast.error(isPt ? "Ocorreu um erro. Por favor, tente novamente." : "An error occurred. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -206,7 +208,7 @@ export default function LoginForm({ authProvider, passkey }: LoginFormProps) {
     try {
       const result = await signInWithPasskey();
       if (result.ok) {
-        toast.success(`Welcome back, ${result.role}!`);
+        toast.success(isPt ? `Bem-vindo de volta, ${result.role}!` : `Welcome back, ${result.role}!`);
         router.push(landingFor(result.role));
         router.refresh();
       } else if (result.message !== null) {
@@ -295,11 +297,22 @@ export default function LoginForm({ authProvider, passkey }: LoginFormProps) {
           <div className="space-y-6 mt-auto">
             <div className="space-y-4 max-w-xl">
               <h1 className="text-4xl font-bold text-white tracking-tight leading-none">
-                The open-source SQL IDE that
-                <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
-                  {" "}
-                  deploys next to your data
-                </span>
+                {isPt ? (
+                  <>
+                    O IDE SQL open-source que{" "}
+                    <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+                      roda junto dos seus dados
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    The open-source SQL IDE that
+                    <span className="bg-gradient-to-r from-blue-400 to-cyan-400 bg-clip-text text-transparent">
+                      {" "}
+                      deploys next to your data
+                    </span>
+                  </>
+                )}
               </h1>
               {/*
                 No longer "deploy with Docker in seconds": Docker is one of two dozen live
@@ -308,8 +321,9 @@ export default function LoginForm({ authProvider, passkey }: LoginFormProps) {
                 Snap, winget, Homebrew and AppImage packages this project ships.
               */}
               <p className="text-base text-fg-tertiary leading-relaxed">
-                Point it at a database you already run. Query, explore and manage every one of them from a single
-                workspace.
+                {isPt
+                  ? "Conecte-se aos bancos de dados que você já possui. Consulte, explore e gerencie todos eles em um único espaço de trabalho."
+                  : "Point it at a database you already run. Query, explore and manage every one of them from a single workspace."}
               </p>
             </div>
 
@@ -365,7 +379,9 @@ export default function LoginForm({ authProvider, passkey }: LoginFormProps) {
               <h2 className="text-2xl font-bold tracking-tight group-hover:text-brand transition-colors duration-200">
                 LibreDB Studio
               </h2>
-              <p className="text-sm text-muted-foreground">Open-source SQL IDE for cloud-native teams</p>
+              <p className="text-sm text-muted-foreground">
+                {isPt ? "IDE SQL open-source para times cloud-native" : "Open-source SQL IDE for cloud-native teams"}
+              </p>
             </div>
           </a>
 
@@ -373,12 +389,16 @@ export default function LoginForm({ authProvider, passkey }: LoginFormProps) {
             {/* Desktop header inside card */}
             <CardHeader className="space-y-1 text-center pb-6 lg:pt-8">
               <CardTitle className="text-2xl font-bold tracking-tight">
-                <span className="hidden lg:inline">Welcome back</span>
-                <span className="lg:hidden">Sign in</span>
+                <span className="hidden lg:inline">{isPt ? "Bem-vindo de volta" : "Welcome back"}</span>
+                <span className="lg:hidden">{isPt ? "Entrar" : "Sign in"}</span>
               </CardTitle>
               <CardDescription className="text-muted-foreground">
-                <span className="hidden lg:inline">Sign in to your LibreDB Studio account</span>
-                <span className="lg:hidden">Enter your credentials to continue</span>
+                <span className="hidden lg:inline">
+                  {isPt ? "Entre na sua conta do LibreDB Studio" : "Sign in to your LibreDB Studio account"}
+                </span>
+                <span className="lg:hidden">
+                  {isPt ? "Digite suas credenciais para continuar" : "Enter your credentials to continue"}
+                </span>
               </CardDescription>
             </CardHeader>
 
@@ -397,7 +417,9 @@ export default function LoginForm({ authProvider, passkey }: LoginFormProps) {
                     </div>
                     <div className="space-y-1">
                       <p className="text-sm font-medium text-foreground">OpenShift</p>
-                      <p className="text-xs text-muted-foreground">Sign in with your OpenShift account</p>
+                      <p className="text-xs text-muted-foreground">
+                        {isPt ? "Entre com sua conta OpenShift" : "Sign in with your OpenShift account"}
+                      </p>
                     </div>
                   </div>
 
@@ -415,7 +437,13 @@ export default function LoginForm({ authProvider, passkey }: LoginFormProps) {
                     disabled={isLoading}
                   >
                     <ExternalLink className="h-4 w-4" />
-                    {isLoading ? "Redirecting..." : "Sign in with OpenShift"}
+                    {isLoading
+                      ? isPt
+                        ? "Redirecionando..."
+                        : "Redirecting..."
+                      : isPt
+                        ? "Entrar com OpenShift"
+                        : "Sign in with OpenShift"}
                   </Button>
                 </>
               ) : isOIDC ? (
@@ -433,7 +461,9 @@ export default function LoginForm({ authProvider, passkey }: LoginFormProps) {
                     <div className="space-y-1">
                       <p className="text-sm font-medium text-foreground">Single Sign-On</p>
                       <p className="text-xs text-muted-foreground">
-                        Sign in securely with your organization&apos;s identity provider
+                        {isPt
+                          ? "Entre com o provedor de identidade da sua organização"
+                          : "Sign in securely with your organization's identity provider"}
                       </p>
                     </div>
                   </div>
@@ -452,7 +482,13 @@ export default function LoginForm({ authProvider, passkey }: LoginFormProps) {
                     disabled={isLoading}
                   >
                     <ExternalLink className="h-4 w-4" />
-                    {isLoading ? "Redirecting..." : "Login with SSO"}
+                    {isLoading
+                      ? isPt
+                        ? "Redirecionando..."
+                        : "Redirecting..."
+                      : isPt
+                        ? "Entrar com SSO"
+                        : "Login with SSO"}
                   </Button>
 
                   {/*
@@ -466,7 +502,7 @@ export default function LoginForm({ authProvider, passkey }: LoginFormProps) {
                   <div className="flex items-center justify-center gap-4 pt-2">
                     <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                       <Shield className="h-3 w-3" />
-                      <span>OIDC Protected</span>
+                      <span>{isPt ? "Protegido por OIDC" : "OIDC Protected"}</span>
                     </div>
                   </div>
                 </>
@@ -474,14 +510,14 @@ export default function LoginForm({ authProvider, passkey }: LoginFormProps) {
                 <>
                   <form onSubmit={handleLogin} className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="email">Email</Label>
+                      <Label htmlFor="email">{isPt ? "Email" : "Email"}</Label>
                       <div className="relative group">
                         <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground transition-colors group-focus-within:text-primary" />
                         <Input
                           id="email"
                           type="email"
                           autoComplete="username"
-                          placeholder="Enter your email"
+                          placeholder={isPt ? "Digite seu email" : "Enter your email"}
                           className="pl-10 h-11 transition-all focus:ring-2 focus:ring-primary/20"
                           value={email}
                           onChange={(e) => {
@@ -493,14 +529,14 @@ export default function LoginForm({ authProvider, passkey }: LoginFormProps) {
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="password">Password</Label>
+                      <Label htmlFor="password">{isPt ? "Senha" : "Password"}</Label>
                       <div className="relative group">
                         <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground transition-colors group-focus-within:text-primary" />
                         <Input
                           id="password"
                           type="password"
                           autoComplete="current-password"
-                          placeholder="Enter your password"
+                          placeholder={isPt ? "Digite sua senha" : "Enter your password"}
                           className="pl-10 h-11 transition-all focus:ring-2 focus:ring-primary/20"
                           value={password}
                           onChange={(e) => {
@@ -513,28 +549,17 @@ export default function LoginForm({ authProvider, passkey }: LoginFormProps) {
                     </div>
                     {mfaRequired && (
                       <div className="space-y-2">
-                        <Label htmlFor="totp">Authentication code</Label>
+                        <Label htmlFor="totp">{isPt ? "Código de autenticação" : "Authentication code"}</Label>
                         <div className="relative group">
                           <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground transition-colors group-focus-within:text-primary" />
                           <Input
                             id="totp"
                             name="totp"
-                            /*
-                             * `text` with an explicit numeric inputMode, not `number`: a number
-                             * input strips a leading zero, and one in six codes starts with one.
-                             * `one-time-code` is what lets iOS and macOS offer the code from the
-                             * paired authenticator without the user leaving the page.
-                             */
                             type="text"
                             inputMode="numeric"
                             autoComplete="one-time-code"
                             pattern="[0-9]*"
                             maxLength={6}
-                            /*
-                             * The field appears mid-flow in response to the user's own submit, so
-                             * moving focus to it is what a sighted user expects and what tells a
-                             * screen-reader user the form grew a step.
-                             */
                             autoFocus
                             placeholder="123456"
                             className="pl-10 h-11 tracking-[0.4em] font-mono transition-all focus:ring-2 focus:ring-primary/20"
@@ -544,7 +569,9 @@ export default function LoginForm({ authProvider, passkey }: LoginFormProps) {
                           />
                         </div>
                         <p className="text-xs text-muted-foreground">
-                          Open your authenticator app and enter the current 6-digit code for this account.
+                          {isPt
+                            ? "Abra seu aplicativo autenticador e digite o código de 6 dígitos desta conta."
+                            : "Open your authenticator app and enter the current 6-digit code for this account."}
                         </p>
                       </div>
                     )}
@@ -552,15 +579,26 @@ export default function LoginForm({ authProvider, passkey }: LoginFormProps) {
                       className="w-full h-11 text-base font-medium shadow-lg shadow-primary/20 active:scale-[0.98] transition-all"
                       type="submit"
                       disabled={isLoading}
+                      aria-label={isLoading ? "Authenticating..." : mfaRequired ? "Verify code" : "Sign in"}
                     >
-                      {isLoading ? "Authenticating..." : mfaRequired ? "Verify code" : "Sign in"}
+                      {isLoading
+                        ? isPt
+                          ? "Autenticando..."
+                          : "Authenticating..."
+                        : mfaRequired
+                          ? isPt
+                            ? "Verificar código"
+                            : "Verify code"
+                          : isPt
+                            ? "Entrar"
+                            : "Sign in"}
                     </Button>
                   </form>
                   {passkeyShown && !mfaRequired && (
                     <>
                       <div className="flex items-center gap-3 text-xs text-muted-foreground">
                         <div className="h-px flex-1 bg-border" />
-                        <span>or</span>
+                        <span>{isPt ? "ou" : "or"}</span>
                         <div className="h-px flex-1 bg-border" />
                       </div>
                       {/* The name must not contain "sign in": E2E tests locate the password submit by it. */}
@@ -571,7 +609,7 @@ export default function LoginForm({ authProvider, passkey }: LoginFormProps) {
                         onClick={handlePasskeySignIn}
                         disabled={isLoading}
                       >
-                        <Fingerprint className="h-4 w-4" /> Use a passkey
+                        <Fingerprint className="h-4 w-4" /> {isPt ? "Usar chave de acesso (Passkey)" : "Use a passkey"}
                       </Button>
                     </>
                   )}
@@ -581,7 +619,9 @@ export default function LoginForm({ authProvider, passkey }: LoginFormProps) {
 
             <CardFooter className="pt-0 pb-6 flex flex-col items-center gap-2">
               <p className="text-xs text-muted-foreground font-medium text-center max-w-[240px]">
-                Enterprise-grade security powered by LibreDB Studio Engine
+                {isPt
+                  ? "Segurança empresarial impulsionada pelo motor LibreDB Studio"
+                  : "Enterprise-grade security powered by LibreDB Studio Engine"}
               </p>
               <span className="text-[10px] text-muted-foreground/60 font-mono">
                 v{process.env.NEXT_PUBLIC_APP_VERSION}

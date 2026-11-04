@@ -6,6 +6,24 @@ O formato é baseado no [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 
 ---
 
+## [2.0.4-ricardtech] - 03/11/2026
+
+### 🌐 Tradução 100% da Tela de Login, Abertura Imediata de Catálogo & Responsividade Lateral
+- **Tradução 100% da Página de Login (`/login`):**
+  - Hero institucional localizado para pt-BR (*O IDE SQL open-source que roda junto dos seus dados*), descrição e sumário de compatibilidade por protocolo.
+  - Cartão de autenticação, cabeçalhos, formulário (*Email, Senha, Código de autenticação*), botões (*Entrar, Autenticando..., Entrar com SSO, Entrar com OpenShift, Usar chave de acesso (Passkey)*) e rodapé corporativo (*Segurança empresarial impulsionada pelo motor LibreDB Studio*).
+  - Alertas e mensagens de toast totalmente em português.
+- **Abertura Imediata do Catálogo sob Demanda:**
+  - O painel de catálogo adiado na árvore de objetos agora é 100% interativo: basta clicar em cima do cartão ou no botão *"Carregar objetos"* para abrir imediatamente todas as tabelas e views do banco de dados.
+  - Clicar na conexão ativa na lista de conexões também aciona o carregamento imediato do catálogo.
+- **Menu Lateral Totalmente Responsivo:**
+  - Otimização do layout vertical do `Sidebar` e `TreePanel`, eliminando padding excessivo e garantindo que o menu lateral nunca cubra as conexões ou o rodapé em resoluções reduzidas ou dentro de iframes (Ricard Hub Desktop).
+- **Sincronização de Conexões no Painel Administrativo (`/admin`):**
+  - `useAllConnections` agora busca diretamente as conexões salvas no volume persistente do servidor caso o navegador ainda não as tenha puxado no editor, além de escutar mutações em tempo real.
+  - Todos os bancos de dados cadastrados passam a ser visíveis e monitorados no *Status dos Servidores* na aba Visão Geral do painel administrativo.
+
+---
+
 ## [2.0.3-ricardtech] - 03/11/2026
 
 ### 🛡️ Integração com Ricard Hub e Dashboards (Suporte a Iframe & Cookies Particionados)

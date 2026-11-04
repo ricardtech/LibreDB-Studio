@@ -397,8 +397,18 @@ export const Sidebar = React.memo(function Sidebar({
     [objectActions, browseKeys, keyScan],
   );
 
+  const handleSelectConnection = React.useCallback(
+    (conn: DatabaseConnection) => {
+      if (activeConnection?.id === conn.id && objectScanDeferred) {
+        onLoadObjects?.();
+      }
+      onSelectConnection(conn);
+    },
+    [activeConnection?.id, objectScanDeferred, onLoadObjects, onSelectConnection],
+  );
+
   return (
-    <div className="flex w-full h-full border-r border-border flex-col bg-background select-none">
+    <div className="flex w-full h-full border-r border-border flex-col bg-background select-none overflow-hidden">
       <div className="h-14 px-4 flex items-center justify-between border-b border-border">
         <div className="flex items-center gap-2">
           <div className="w-5 h-5 bg-brand-solid rounded flex items-center justify-center">
@@ -462,7 +472,7 @@ export const Sidebar = React.memo(function Sidebar({
         <ConnectionsList
           connections={connections}
           activeConnection={activeConnection}
-          onSelectConnection={onSelectConnection}
+          onSelectConnection={handleSelectConnection}
           onDeleteConnection={onDeleteConnection}
           onEditConnection={onEditConnection}
           onDuplicateConnection={onDuplicateConnection}

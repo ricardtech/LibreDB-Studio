@@ -1,5 +1,6 @@
 import { Fragment } from "react";
 import { WIRE_COMPATIBLE_ENGINES } from "@/lib/db/compatibility";
+import { useTranslation } from "@/lib/i18n";
 
 interface WireCompatibleLineProps {
   variant: "desktop" | "mobile";
@@ -38,6 +39,7 @@ interface WireCompatibleLineProps {
  * existed, so this is the one block on the page that has to earn its lines.
  */
 export function WireCompatibleLine({ variant }: WireCompatibleLineProps) {
+  const { isPt } = useTranslation();
   const isDesktop = variant === "desktop";
   return (
     <p
@@ -48,7 +50,9 @@ export function WireCompatibleLine({ variant }: WireCompatibleLineProps) {
           : "text-[10px] text-center text-muted-foreground leading-snug pointer-events-none select-none"
       }
     >
-      Plus {WIRE_COMPATIBLE_ENGINES.length} wire-compatible engines, each measured on a live instance:{" "}
+      {isPt
+        ? `Mais de ${WIRE_COMPATIBLE_ENGINES.length} motores compatíveis por protocolo, cada um testado em instâncias reais: `
+        : `Plus ${WIRE_COMPATIBLE_ENGINES.length} wire-compatible engines, each measured on a live instance: `}
       {WIRE_COMPATIBLE_ENGINES.map((engine, index) => (
         <Fragment key={engine.name}>
           {index > 0 && ", "}

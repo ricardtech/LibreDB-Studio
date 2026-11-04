@@ -4,7 +4,7 @@ import { appFetch } from "@/lib/config/base-path";
 import { useState, useEffect } from "react";
 import type { DatabaseConnection } from "@/lib/types";
 import { storage } from "@/lib/storage";
-import { connectionsUnderPolicy, readConnectionPolicy, type ConnectionPolicy } from "@/lib/connection-policy";
+import { connectionsUnderPolicy, readConnectionPolicy, CUSTOM_CONNECTIONS_ALLOWED, type ConnectionPolicy } from "@/lib/connection-policy";
 import { ApiErrorCode } from "@/lib/api/error-codes";
 import { startManagedListRefresh } from "@/lib/connection-refresh";
 import { reconcileConnections } from "@/lib/connection-reconcile";
@@ -41,7 +41,34 @@ export function useAllConnections() {
       // The user's own connections the server would refuse (ALLOW_CUSTOM_CONNECTIONS) are left out
       // here as they are in the editor, so the admin pages, the monitoring page and the schema diff
       // never offer a connection that can only answer 403.
-      const userConns = connectionsUnderPolicy(storage.getConnections(), policy);
+      let rawUserConns = storage.getConnections();
+
+      // If localStorage is not yet populated (e.g. freshly signed in directly on /admin before editor mount),
+      // attempt to pull from server storage if available.
+      if (rawUserConns.length === 0) {
+        try {
+          const storageRes = await appFetch("/api/storage");
+          if (storageRes.ok && !cancelled) {
+            const data = await storageRes.json();
+            if (Array.isArray(data?.connections) && data.connections.length > 0) {
+              rawUserConns = data.connections.map((c: any) => ({
+                ...c,
+                createdAt: c.createdAt ? new Date(c.createdAt) : new Date(),
+              }));
+              // Write to localStorage so future reads have them instantly
+              try {
+                localStorage.setItem("libredb_connections", JSON.stringify(rawUserConns));
+              } catch {
+                // Ignore localStorage errors
+              }
+            }
+          }
+        } catch {
+          // Ignore server storage fetch error
+        }
+      }
+
+      const userConns = connectionsUnderPolicy(rawUserConns, policy);
       const dismissed = new Set(storage.getDismissedSeeds());
       const answer: LoadAnswer = { answered: false, unavailable: false, cacheHint: null };
 
@@ -96,10 +123,25 @@ export function useAllConnections() {
 
     let stopRefresh: (() => void) | undefined;
 
+    let activePolicy: ConnectionPolicy = CUSTOM_CONNECTIONS_ALLOWED;
+
+    const handleStorageChange = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      if (!customEvent.detail || customEvent.detail.collection === "connections") {
+        void load(false, activePolicy);
+      }
+    };
+
+    if (typeof window !== "undefined") {
+      window.addEventListener("libredb-storage-change", handleStorageChange);
+      window.addEventListener("storage", handleStorageChange);
+    }
+
     // Read the policy once per mount, as the editor does. Only an answered first read or
     // 503 GOVERNANCE_UNAVAILABLE starts refreshes, using that read's cacheHint throughout.
     const initialLoad = async () => {
       const policy = await readConnectionPolicy();
+      activePolicy = policy;
       if (cancelled) return;
       const answer = await load(true, policy);
       if (!cancelled) {
@@ -117,6 +159,10 @@ export function useAllConnections() {
     return () => {
       cancelled = true;
       stopRefresh?.();
+      if (typeof window !== "undefined") {
+        window.removeEventListener("libredb-storage-change", handleStorageChange);
+        window.removeEventListener("storage", handleStorageChange);
+      }
     };
   }, []);
 
