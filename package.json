@@ -292,7 +292,7 @@
     "knip": "^6.34.0",
     "node-opcua-server": "2.187.18",
     "oxlint": "^1.81.0",
-    "protobufjs": "7.6.6",
+    "protobufjs": "8.8.1",
     "reflect-metadata": "0.2.2",
     "tailwindcss": "^4.3.3",
     "tsup": "^9.0.0",
