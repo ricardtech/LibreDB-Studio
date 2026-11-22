@@ -1,3 +1,11 @@
+<!-- ricardtech-metrics:start -->
+<p align="center">
+  <a href="https://github.com/alaxricardsilva/ricardtech-metrics">
+    <img src="https://raw.githubusercontent.com/alaxricardsilva/ricardtech-metrics/main/charts/libredb-studio.svg" alt="Métricas do Repositório" />
+  </a>
+</p>
+<!-- ricardtech-metrics:end -->
+
 <p align="center">
   <img src="public/logo.svg" width="200" alt="LibreDB Studio Logo" />
 </p>
